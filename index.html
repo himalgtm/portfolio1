@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Himal Gautam</title>
+  <meta name="description" content="Himal Gautam — Computer Science + GIS. Projects in geospatial AI, full-stack apps, and hardware." />
+
+  <!-- Fonts + Tailwind -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'], mono: ['JetBrains Mono','ui-monospace','SFMono-Regular'] },
+          colors: { brand: { DEFAULT:'#10b981', dark:'#059669' } },
+          boxShadow: { glow: '0 0 0 2px rgba(16,185,129,.25), 0 10px 30px -10px rgba(16,185,129,.35)' }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+  /* Glass cards + sheen */
+  .fx-card{
+    position:relative; border-radius:1rem;
+    background:linear-gradient(180deg, rgba(15,23,42,.58), rgba(15,23,42,.34));
+    border:1px solid rgba(100,116,139,.35); backdrop-filter: blur(6px);
+    transition: transform .45s cubic-bezier(.2,.6,.2,1), box-shadow .45s cubic-bezier(.2,.6,.2,1), border-color .35s;
+    box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -12px rgba(0,0,0,.55);
+    z-index:1; /* sit above map */
+  }
+  .fx-card:hover{
+    transform: translateY(-6px) scale(1.01);
+    border-color: rgba(148,163,184,.5);
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(16,185,129,.15) inset;
+  }
+  .fx-card.card-sheen::after{
+    content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+    background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 35%, rgba(255,255,255,.02) 55%, transparent 75%);
+    transform:translateX(-120%); transition:transform .9s ease;
+  }
+  .fx-card:hover.card-sheen::after{ transform:translateX(110%); }
+
+  /* Tilt */
+  .fx-tilt{ perspective:800px; transform-style:preserve-3d; }
+  .fx-tilt > .fx-tilt-inner{
+    transition: transform .35s cubic-bezier(.2,.6,.2,1);
+    will-change: transform;
+  }
+
+  /* Buttons: magnetic + ripple */
+  .btn{ position:relative; overflow:hidden; isolation:isolate; transition: transform .16s ease; }
+  .btn:active{ transform: translateY(1px) scale(.99); }
+  .btn::after{
+    content:""; position:absolute; width:10px; height:10px;
+    left:var(--rx,-999px); top:var(--ry,-999px);
+    border-radius:999px; background:radial-gradient(circle, rgba(56,189,248,.6), rgba(56,189,248,0) 60%);
+    transform:translate(-50%,-50%) scale(0);
+  }
+  .btn.rippling::after{ animation: ripple .65s ease-out forwards; }
+  @keyframes ripple{ from{transform:translate(-50%,-50%) scale(.15);opacity:.55} to{transform:translate(-50%,-50%) scale(16);opacity:0} }
+
+  /* Make sure map never steals events */
+  #map-wrap{ pointer-events:none; z-index:-3; }
+</style>
+
+
+  <style>
+    :root { --bg: #0b1220; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: #e5e7eb; }
+
+    /* ===== Global Background Layers ===== */
+    #map-wrap { position: fixed; inset: 0; z-index: -3; overflow: hidden; }
+    #moving-map { width:100%; height:100%; filter: brightness(.78) contrast(1.15) saturate(1.08); }
+    .leaflet-control-container { display:none; }
+    .leaflet-container { background: transparent !important; }
+
+    /* brand tint + subtle vignette */
+    #map-wrap::after {
+      content:""; position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+      background:
+        radial-gradient(1200px 700px at 70% -10%, rgba(16,185,129,.09), transparent 60%),
+        radial-gradient(900px 500px at -10% 0%, rgba(14,165,233,.08), transparent 60%),
+        linear-gradient(to bottom, rgba(2,6,23,.6), rgba(2,6,23,.3) 35%, rgba(2,6,23,.75));
+    }
+
+    /* Stars + aurora */
+    #stars, #aurora { position: fixed; inset: 0; pointer-events: none; z-index: -2; }
+    #stars { opacity: .35; }
+    #aurora {
+      mix-blend-mode: screen; opacity:.18;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(16,185,129,.25), transparent 55%),
+        radial-gradient(900px 480px at 80% 0%, rgba(14,165,233,.22), transparent 60%),
+        conic-gradient(from 220deg at 60% 20%, rgba(56,189,248,.15), rgba(16,185,129,.08), transparent 60%);
+      animation: aurora 28s linear infinite;
+    }
+    @keyframes aurora { 0%{transform:translate3d(0,0,0) rotate(0)} 50%{transform:translate3d(0,-2%,0) rotate(2deg)} 100%{transform:translate3d(0,0,0) rotate(0)} }
+
+    /* ===== Glass Cards ===== */
+    .card-glass{
+      position:relative; border-radius:1rem;
+      background:linear-gradient(180deg, rgba(15,23,42,.55), rgba(15,23,42,.35));
+      border:1px solid rgba(100,116,139,.35); backdrop-filter: blur(6px);
+      transition: transform .45s cubic-bezier(.2,.6,.2,1), box-shadow .45s cubic-bezier(.2,.6,.2,1), border-color .35s, background .6s;
+      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -12px rgba(0,0,0,.55);
+    }
+    .card-glass:hover{
+      transform: translateY(-6px) scale(1.01);
+      border-color: rgba(148,163,184,.5);
+      box-shadow: 0 20px 40px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(16,185,129,.15) inset;
+    }
+    .card-sheen::after{
+      content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 35%, rgba(255,255,255,.02) 55%, transparent 75%);
+      transform: translateX(-120%); transition: transform .9s ease;
+    }
+    .card-glass:hover.card-sheen::after{ transform: translateX(110%); }
+
+    /* ===== Buttons: magnetic + ripple ===== */
+    .btn { position:relative; overflow:hidden; isolation:isolate; transition: transform .16s ease; }
+    .btn:active { transform: translateY(1px) scale(.99); }
+    .btn::after{
+      content:""; position:absolute; width:10px; height:10px; left:var(--rx, -999px); top:var(--ry, -999px);
+      border-radius:999px; background: radial-gradient(circle, rgba(56,189,248,.6), rgba(56,189,248,0) 60%);
+      transform: translate(-50%,-50%) scale(0);
+    }
+    .btn.rippling::after{ animation: ripple .65s ease-out forwards; }
+    @keyframes ripple { from{transform:translate(-50%,-50%) scale(.15); opacity:.55} to{transform:translate(-50%,-50%) scale(16); opacity:0} }
+
+    /* ===== Pulse Pin for base location ===== */
+    .pulse-pin{ position:relative; width:12px; height:12px; background:#10b981; border-radius:9999px; box-shadow:0 0 0 2px rgba(16,185,129,.35),0 0 14px rgba(16,185,129,.55); }
+    .pulse-pin::after{ content:""; position:absolute; inset:-8px; border:2px solid rgba(16,185,129,.35); border-radius:9999px; animation:pulse 2.6s ease-out infinite; }
+    @keyframes pulse { 0%{transform:scale(.4);opacity:.85} 70%,100%{transform:scale(1.6);opacity:0} }
+
+    /* ===== Devpost & Close icons ===== */
+    .icon-devpost{ width:18px; height:18px; display:inline-block; }
+    .icon-devpost .hex{ fill:#00B5E2 } .icon-devpost .letter{ fill:var(--bg) }
+    .close-x{ position:relative; width:16px; height:16px; display:inline-block; }
+    .close-x::before,.close-x::after{ content:""; position:absolute; left:50%; top:50%; width:16px; height:2px; background:currentColor; border-radius:2px; transform-origin:center; transition: transform .22s ease }
+    .close-x::before{ transform:translate(-50%,-50%) rotate(45deg) } .close-x::after{ transform:translate(-50%,-50%) rotate(-45deg) }
+    [data-close].btn:hover .close-x,[data-close].btn:focus-visible .close-x{ transform: rotate(90deg) }
+
+    /* ===== Utilities ===== */
+    .grid-bg{ background-image: linear-gradient(to right, rgba(148,163,184,.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,.06) 1px, transparent 1px); background-size:24px 24px; }
+  </style>
+</head>
+
+<body class="min-h-full">
+
+  <!-- GLOBAL BACKGROUND -->
+  <div id="map-wrap" aria-hidden="true"><div id="moving-map"></div></div>
+  <canvas id="stars"></canvas>
+  <div id="aurora" aria-hidden="true"></div>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 backdrop-blur bg-slate-950/70 border-b border-slate-800/60">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="h-14 flex items-center justify-between gap-3">
+        <a href="#top" class="font-mono tracking-[0.18em] text-slate-200 hover:text-white text-sm whitespace-nowrap">HIMAL&nbsp;GAUTAM</a>
+        <nav class="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-6 text-slate-300">
+          <a href="#about" class="hover:text-white">About</a>
+          <a href="#experience" class="hover:text-white">Experience</a>
+          <a href="#projects" class="hover:text-white">Projects</a>
+          <a href="#skills" class="hover:text-white">Skills</a>
+          <a href="#blogs" class="hover:text-white">Blogs</a>
+        </nav>
+        <div class="shrink-0">
+          <div class="flex items-center gap-3 px-4 h-11 rounded-full bg-slate-900/60 backdrop-blur border border-slate-800 ring-1 ring-black/10 relative">
+            <span class="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-white/5 via-transparent to-black/10"></span>
+            <a href="https://www.linkedin.com/in/gautamhimal" target="_blank" class="p-2 rounded-full hover:bg-slate-800/70" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current text-slate-200 hover:text-white"><path d="M4.98 3.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM3.5 9h3v12h-3V9zm6 0h2.8v1.7h.04c.39-.74 1.34-1.7 2.76-1.7 2.95 0 3.9 1.94 3.9 4.46V21h-3v-6.2c0-1.48-.03-3.38-2.06-3.38-2.07 0-2.39 1.62-2.39 3.28V21h-3V9z"/></svg>
+            </a>
+            <a href="https://github.com/himalgtm" target="_blank" class="p-2 rounded-full hover:bg-slate-800/70" aria-label="GitHub">
+              <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current text-slate-200 hover:text-white"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.38 7.86 10.9.58.11.8-.25.8-.56v-2.1c-3.2.71-3.87-1.39-3.87-1.39-.53-1.36-1.3-1.72-1.3-1.72-1.06-.74.08-.73.08-.73 1.17.08 1.78 1.21 1.78 1.21 1.04 1.79 2.73 1.27 3.4.97.11-.76.41-1.27.74-1.56-2.55-.29-5.23-1.27-5.23-5.64 0-1.25.45-2.27 1.2-3.07-.12-.3-.52-1.53.11-3.18 0 0 .98-.31 3.21 1.17a11.1 11.1 0 0 1 5.85 0c2.23-1.48 3.21-1.17 3.21-1.17.63 1.65.23 2.88.11 3.18.75.8 1.2 1.82 1.2 3.07 0 4.39-2.69 5.34-5.25 5.63.42.36.8 1.06.8 2.15v3.2c0 .31.21.68.81.56A11.51 11.51 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
+            </a>
+            <a href="https://instagram.com/himalgtx" target="_blank" class="p-2 rounded-full hover:bg-slate-800/70" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" class="w-5 h-5 fill-current text-slate-200 hover:text-white"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13zm6 1.1a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="top" class="relative">
+    <div class="max-w-6xl mx-auto px-5 pt-16 pb-10">
+      <div class="grid md:grid-cols-12 gap-8 items-center">
+        <div class="md:col-span-11">
+          <h1 class="text-7xl md:text-8xl font-semibold leading-tight">Hi, I’m <span class="text-brand">Himal Gautam.</span></h1>
+          <p class="mt-6 text-lg text-slate-300 max-w-3xl">
+            CS + GIS @ UNT. I build geospatial AI pipelines, full-stack apps, and hardware-backed prototypes. Open to research collaborations, internships, and GeoAI projects.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="#projects" class="btn px-4 py-2 rounded-lg bg-brand text-slate-900 font-medium hover:bg-brand/dark shadow-glow">See projects</a>
+            <a href="#experience" class="btn px-4 py-2 rounded-lg border border-slate-700">Experience</a>
+            <a href="mailto:himalgautam@my.unt.edu" class="btn px-4 py-2 rounded-lg border border-slate-700">Email</a>
+            <a href="assets/himal_s_resume.pdf" download class="btn px-3 py-2 rounded-lg border border-slate-700 hover:bg-slate-900/60">Download Résumé</a>
+          </div>
+          <div class="mt-6 text-sm text-slate-400 space-x-1">
+            <span>Denton, TX</span> · <span>(862) 428-4433</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<!-- ===== ABOUT / EDUCATION (replacement) ===== -->
+
+<section id="about" class="max-w-6xl mx-auto px-5 py-10">
+  <div class="grid md:grid-cols-2 gap-6">
+    <!-- Education -->
+    <div class="fx-card card-sheen fx-tilt p-5">
+      <div class="fx-tilt-inner">
+        <h2 class="text-xl font-semibold mb-3">Education</h2>
+        <div class="space-y-6 text-slate-200">
+          <!-- UNT -->
+          <div class="flex items-start gap-4">
+            <div class="shrink-0 grid place-items-center w-14 h-14 rounded-full bg-white ring-1 ring-slate-300 shadow-inner">
+              <img src="assets/unt_logo.png" alt="UNT" class="max-w-[70%] object-contain">
+            </div>
+            <div>
+              <div class="font-medium text-white">University of North Texas - Denton, TX</div>
+              <div class="text-sm">B.S. Computer Science + Geographic Information Systems
+                <span class="text-slate-400">(Expected Dec 2027)</span>
+              </div>
+              <div class="text-sm mt-1">GPA: 3.89 · Dean’s List</div>
+              <div class="text-sm mt-1">Coursework: Data Structures I, Operating Systems, LiDAR in GIS, DBMS, Full-stack Dev, Prob & Stats</div>
+            </div>
+          </div>
+          <!-- Caldwell -->
+          <div class="flex items-start gap-4 pt-4 border-t border-slate-800/70">
+            <div class="shrink-0 grid place-items-center w-14 h-14 rounded-full bg-white ring-1 ring-slate-300 shadow-inner">
+              <img src="assets/Caldwell_logo.png" alt="Caldwell" class="max-w-[75%] object-contain">
+            </div>
+            <div>
+              <div class="font-medium text-white">Caldwell University - Caldwell, NJ</div>
+              <div class="text-sm">B.S. Computer Science
+                <span class="text-slate-400">(Jan 2024 – May 2025; transferred)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="fx-card card-sheen fx-tilt p-6">
+      <div class="fx-tilt-inner">
+        <h2 class="text-xl font-semibold mb-3">About</h2>
+        <p class="text-slate-300">
+          Somewhere along the way, I fell in love with both maps and machines. There’s just something about the invisible systems
+          holding our world together; the patterns in satellite images, the logic behind the code humming in the background, that
+          pulls me in. I’m not the guy who knows everything, but I’ll absolutely be the one up at 3AM figuring it out. Whether I’m
+          debugging a Python script, layering field data in ArcGIS, or walking through a forest wondering how LiDAR sees trees;
+          I’m fully in it. Still learning. Still messing up. Still loving every second of it.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- EXPERIENCE (Compact list -> expandable detail card) -->
+  <section id="experience" class="max-w-6xl mx-auto px-5 py-10">
+    <h2 class="text-2xl font-semibold mb-6">Experience</h2>
+
+    <!-- List -->
+    <div id="exp-list" class="space-y-3">
+
+      <!-- Item: Peer Mentor — UNT -->
+      <button
+        class="exp-item w-full flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 transition text-left"
+        data-target="exp-mentor" aria-expanded="false">
+        <span class="shrink-0 grid place-items-center w-12 h-12 rounded-full bg-white/95 ring-1 ring-slate-300 shadow-sm overflow-hidden">
+          <img src="assets/unteng.png" alt="UNT" class="w-9 h-9 object-contain [image-rendering:-webkit-optimize-contrast]" />
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold truncate">Peer Mentor - UNT College of Engineering</div>
+          <div class="text-xs text-slate-400">Denton, TX · Fall 2025 – Present</div>
+        </div>
+        <svg class="chev w-4 h-4 text-slate-400 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+      </button>
+      <div id="exp-mentor" class="exp-panel overflow-hidden max-h-0 opacity-0 transition-[max-height,opacity] duration-400 ease-out hidden">
+        <div class="px-4 pb-4 pt-1">
+          <ul class="list-disc pl-5 text-slate-300 space-y-2">
+            <li>Supported 90+ students across three Computer Science I (CSCE 1030) lab sections in building strong programming fundamentals.</li>
+            <li>Collaborated with faculty to streamline course workflows, improving lab efficiency and student engagement.</li>
+            <li>Assist with debugging, logic-building, and core C++ concepts; foster confidence in problem-solving.</li>
+          <li class="text-slate-400 text-sm">Skills: C++, Secure Shell (SSH), Git, Linux CLI, PuTTY, Object-Oriented Programming (OOP).</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Item: Undergraduate Research Assistant — UNT -->
+      <button
+        class="exp-item w-full flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 transition text-left"
+        data-target="exp-ra" aria-expanded="false">
+        <span class="shrink-0 grid place-items-center w-12 h-12 rounded-full bg-white/95 ring-1 ring-slate-300 shadow-sm overflow-hidden">
+          <img src="assets/untclasss.png" alt="UNT GEO" class="w-9 h-9 object-contain [image-rendering:-webkit-optimize-contrast]" />
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold truncate">Undergraduate Research Assistant - UNT College of Liberal Arts and Social Sciences</div>
+          <div class="text-xs text-slate-400">Denton, TX · Summer 2025</div>
+        </div>
+        <svg class="chev w-4 h-4 text-slate-400 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+      </button>
+      <div id="exp-ra" class="exp-panel overflow-hidden max-h-0 opacity-0 transition-[max-height,opacity] duration-400 ease-out hidden">
+        <div class="px-4 pb-4 pt-1">
+          <ul class="list-disc pl-5 text-slate-300 space-y-2">
+            <li>Built an end-to-end geospatial segmentation pipeline using SAM 2.1 + Segment-Geospatial; processed multi-GB NAIP/CHM GeoTIFFs with batched PyTorch/CUDA inference for tree-crown mapping.</li>
+            <li>Automated georeferenced mask merging and raster tiling for large-scale GIS integration, optimizing model throughput by ~40%.</li>
+            <li>Validated outputs against field datasets; prepared ArcGIS-ready shapefiles; documented the workflow for reproducibility.</li>
+            <li class="text-slate-400 text-sm">Tech: PyTorch, CUDA, OpenCV, Pandas, Git, FFMpeg, Google Collab, Rasterio, Segment-Geospatial, ArcGIS Pro.</li>
+        </ul>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Item: Peer Tutor — Caldwell -->
+      <button
+        class="exp-item w-full flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 transition text-left"
+        data-target="exp-tutor" aria-expanded="false">
+        <span class="shrink-0 grid place-items-center w-12 h-12 rounded-full bg-white/95 ring-1 ring-slate-300 shadow-sm overflow-hidden">
+          <img src="assets/CALDWELL.jpg" alt="Caldwell" class="w-9 h-9 object-contain [image-rendering:-webkit-optimize-contrast]" />
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold truncate">Peer Tutor - Academic Success Center, Caldwell University</div>
+          <div class="text-xs text-slate-400">Caldwell, NJ · Fall 2024</div>
+        </div>
+        <svg class="chev w-4 h-4 text-slate-400 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+      </button>
+      <div id="exp-tutor" class="exp-panel overflow-hidden max-h-0 opacity-0 transition-[max-height,opacity] duration-400 ease-out hidden">
+        <div class="px-4 pb-4 pt-1">
+          <ul class="list-disc pl-5 text-slate-300 space-y-2">
+            <li>Provided tutoring in CS196 (OOP), CS230 (Front-End), MA140 (Discrete Math), etc.</li>
+            <li>Led targeted sessions on data structures, problem decomposition, and web architecture; improved average student performance by ~15%.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Item: Co-Founder — Moksha -->
+      <button
+        class="exp-item w-full flex items-center gap-4 p-3 rounded-xl border border-slate-800 bg-slate-900/40 hover:bg-slate-900/70 transition text-left"
+        data-target="exp-moksha" aria-expanded="false">
+        <span class="shrink-0 grid place-items-center w-12 h-12 rounded-full bg-white/95 ring-1 ring-slate-300 shadow-sm overflow-hidden">
+          <img src="assets/MOKSHA.jpg" alt="Moksha" class="w-9 h-9 object-contain [image-rendering:-webkit-optimize-contrast]" />
+        </span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold truncate">Co-Founder - Moksha Enterprises Pvt. Ltd.</div>
+          <div class="text-xs text-slate-400">Birendranagar, Nepal · Jan 2023 – Present</div>
+        </div>
+        <svg class="chev w-4 h-4 text-slate-400 transition-transform duration-300" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5"/></svg>
+      </button>
+      <div id="exp-moksha" class="exp-panel overflow-hidden max-h-0 opacity-0 transition-[max-height,opacity] duration-400 ease-out hidden">
+        <div class="px-4 pb-4 pt-1">
+          <ul class="list-disc pl-5 text-slate-300 space-y-2">
+            <li>Geo-ICT startup specializing in municipal-level land-use zoning and GIS-based planning.</li>
+            <li>Validated spatial datasets in ArcGIS Pro & Google Earth; aligned with cadastral layers and field-collected data; supported on-site surveys and stakeholder meetings.</li>
+            <li>Co-designed company website & digital workflow to streamline client communication.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="max-w-6xl mx-auto px-5 py-10">
+    <div class="flex items-end justify-between mb-6">
+      <h2 class="text-2xl font-semibold">Projects</h2>
+      
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Kozi.REST -->
+      <button data-modal="modal-kozi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-lg font-semibold">Kozi.REST - AI-Powered Sleep Tracker</h3>
+          <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackUTA</span>
+        </div>
+        <p class="mt-2 text-slate-300">Kozi.REST is an AI-powered bedside sleep companion designed to help users understand and improve their sleep quality through environmental and behavioral data...</p>
+      </button>
+
+      <!-- RunSafe -->
+      <button data-modal="modal-runsafe" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-lg font-semibold">RunSafe - Smart Running Tracker</h3>
+          <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackRice</span>
+        </div>
+        <p class="mt-2 text-slate-300">RunSafe was built to make outdoor running safer by merging geospatial analytics with environmental health data. The app retrieves live AQI (air-quality index)...</p>
+      </button>
+
+      <!-- Baymax -->
+      <button data-modal="modal-baymax" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-lg font-semibold">Baymax - AI Mental Health Assistant</h3>
+          <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackDartmouth</span>
+        </div>
+        <p class="mt-2 text-slate-300">Baymax is a virtual companion designed to provide accessible mental-health support through natural conversation and personalized recommendations. I handled the...</p>
+      </button>
+
+      <!-- Dristi -->
+      <button data-modal="modal-dristi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-lg font-semibold">Dristi - Smart Cane </h3>
+          <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackPrinceton</span>
+        </div>
+        <p class="mt-2 text-slate-300">Dristi (“vision” in Nepali) is a smart mobility aid designed to enhance independence and safety for visually impaired individuals. Built entirely on Raspberry Pi OS...</p>
+      </button>
+
+      <!-- MyGarage -->
+      <button data-modal="modal-garage" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-lg font-semibold">MyGarage - A Simple Car Tracker</h3>
+        </div>
+        <p class="mt-2 text-slate-300">MyGarage is a clean and minimal web app I built to keep track of the cars. It lets me add details like the make, model, year, mileage, fuel type, VIN number, and more... </p>
+      </button>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+<section id="skills" class="max-w-6xl mx-auto px-5 py-10">
+  <h2 class="text-2xl font-semibold mb-6">Skills</h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <!-- Languages -->
+    <div class="fx-card fx-tilt p-6">
+      <div class="fx-tilt-inner">
+        <h3 class="font-medium mb-2">Languages</h3>
+        <p class="text-slate-300">
+          Python, JavaScript, TypeScript, C/C++, Java
+        </p>
+      </div>
+    </div>
+
+    <!-- Frameworks -->
+    <div class="fx-card fx-tilt p-6">
+      <div class="fx-tilt-inner">
+        <h3 class="font-medium mb-2">Frameworks</h3>
+        <p class="text-slate-300">
+          React, Node.js, Express.js, Tailwind CSS, FastAPI, NumPy, Pandas, Matplotlib
+        </p>
+      </div>
+    </div>
+
+    <!-- Technologies & Tools -->
+    <div class="fx-card fx-tilt p-6">
+      <div class="fx-tilt-inner">
+        <h3 class="font-medium mb-2">Technologies &amp; Tools</h3>
+        <p class="text-slate-300">
+          ArcGIS Pro, Google Earth Engine, PyTorch, CUDA, Git, Linux, MongoDB, SSMS, Lucidchart, PWA, Raspberry Pi
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- BLOG -->
+  <section id="blogs" class="max-w-6xl mx-auto px-5 py-10">
+    <div class="flex items-end justify-between mb-6">
+      <h2 class="text-2xl font-semibold">Latest from my Blog</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Card 1: SAM2 -->
+      <button data-modal="modal-sam2" class="group relative rounded-xl overflow-hidden border border-slate-800">
+        <img src="assets/sam2_cover.png" alt="SAM2" class="w-full h-56 object-cover"/>
+        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
+          <div class="flex items-center gap-2 text-xs text-white/90">
+            <span class="px-2 py-0.5 rounded bg-pink-600">Computer Vision</span>
+            <span>2025</span>
+          </div>
+          <h5 class="mt-2 font-medium text-white">SAM 2 Installation & Overview</h5>
+          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Windows setup, CUDA/PyTorch match, checkpoints, Segment-Geospatial workflow — with images.</p>
+        </div>
+      </button>
+
+      <!-- Card 2: Tools -->
+      <button data-modal="modal-tools" class="group relative rounded-xl overflow-hidden border border-slate-800">
+        <img src="assets/tools.jpg" alt="Tools" class="w-full h-56 object-cover"/>
+        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
+          <div class="flex items-center gap-2 text-xs text-white/90">
+            <span class="px-2 py-0.5 rounded bg-emerald-600">Dev Notes</span>
+            <span>2025</span>
+          </div>
+          <h5 class="mt-2 font-medium text-white">Top Tools I Use (and why)</h5>
+          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Opinionated picks for GIS + CS work with paste-ready snippets.</p>
+        </div>
+      </button>
+
+      <!-- Card 3: Placeholder for next post -->
+      <a href="#contact" class="group relative rounded-xl overflow-hidden border border-slate-800">
+        <img src="assets/soon.jpg" alt="Blog" class="w-full h-56 object-cover"/>
+        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
+          <div class="flex items-center gap-2 text-xs text-white/90">
+            <span class="px-2 py-0.5 rounded bg-sky-600">Update</span>
+            <span>Soon</span>
+          </div>
+          <h5 class="mt-2 font-medium text-white">New research note incoming</h5>
+          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Have a topic in mind? Hit me up.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-800/80 py-8">
+    <div class="max-w-6xl mx-auto px-5 text-sm text-slate-400 flex items-center justify-between">
+      <div>© <span id="yr"></span> Himal Gautam.</div>
+      <div class="flex gap-4">
+        <a class="hover:text-white underline" href="#about">About</a>
+        <a class="hover:text-white underline" href="#projects">Projects</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- OVERLAY -->
+  <div id="modal-overlay" class="fixed inset-0 z-[60] hidden bg-black/60"></div>
+
+  <!-- MODALS -->
+  <!-- Blog Modal: Tools (updated with your full content) -->
+  <div id="modal-tools" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">Top Tools I Use (and Why)</h3>
+        <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+      </div>
+
+      <p class="mt-3 text-slate-300">
+        When you build across AI, GIS, and full-stack apps, your toolkit becomes your map. Mine has evolved from late-night debugging in PyTorch to mapping tree crowns in ArcGIS and wiring sensors on a Raspberry Pi.
+        These are the tools I reach for when I want to ship fast, keep it clean, and still understand the system under the hood.
+      </p>
+
+      <h4 class="mt-6 font-medium text-slate-100">🌍 ArcGIS Pro / QGIS — Where the Map Begins</h4>
+      <p class="mt-2 text-slate-300">
+        Whether it’s zoning layers for municipalities or remote-sensed imagery, ArcGIS Pro and QGIS are the backbone of my spatial workflow.<br/>
+        <span class="text-slate-200">ArcGIS Pro</span> gives me enterprise-grade precision for cartography, geoprocessing, and topology validation.<br/>
+        <span class="text-slate-200">QGIS</span>, being open source, is perfect for rapid experiments and automations.
+      </p>
+      <p class="mt-2 text-slate-300"><span class="font-medium">Pro tip:</span> Export vector data as GeoPackage (<code class="bg-slate-800 px-1 rounded">.gpkg</code>) — portable, single-file, and readable across both ecosystems.</p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># quick layer export example (QGIS)
+Processing &gt; Toolbox &gt; Vector general &gt; Package layers</code></pre>
+
+      <h4 class="mt-6 font-medium text-slate-100">⚙️ PyTorch + CUDA — Powering GeoAI</h4>
+      <p class="mt-2 text-slate-300">
+        Most of my research pipelines depend on PyTorch accelerated by CUDA for model inference. Before running large jobs, I always verify the CUDA ↔ build matrix to avoid runtime nightmares.
+      </p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># sanity check
+python -m torch.utils.collect_env</code></pre>
+      <p class="mt-2 text-slate-300">
+        This stack powers my integration of Meta’s Segment Anything 2 (SAM2) model — a transformer-based segmentation engine that detects everything from canopy outlines to man-made structures.
+      </p>
+
+      <h4 class="mt-6 font-medium text-slate-100">🗺️ Segment-Geospatial — From Pixels to Polygons</h4>
+      <p class="mt-2 text-slate-300">
+        Segment-Geospatial bridges AI and GIS. It converts SAM masks directly into vector shapefiles, ready for analysis or web visualization.
+      </p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>from segment_geospatial import segment_image
+segment_image("naip_tile.tif", output="mask_vector.shp")</code></pre>
+      <p class="mt-2 text-slate-300">
+        This single function replaces hours of manual digitization, especially when mapping tree crowns from NAIP imagery or CHM rasters.
+      </p>
+
+      <h4 class="mt-6 font-medium text-slate-100">⚛️ React + Vite + Tailwind — Fast Front-Ends</h4>
+      <p class="mt-2 text-slate-300">
+        When I switch from GIS to product prototypes, I rely on this trio:<br/>
+        • React for modular UI logic<br/>
+        • Vite for lightning-fast builds<br/>
+        • Tailwind for clean, responsive design without CSS bloat
+      </p>
+      <p class="mt-2 text-slate-300">They let me go from concept → polished app in one stack. For example, my RunSafe app used this setup to render dynamic route safety scores in real time.</p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>npm create vite@latest appname -- --template react
+cd appname
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p</code></pre>
+
+      <h4 class="mt-6 font-medium text-slate-100">🧩 Node / Express — Backends Without the Drama</h4>
+      <p class="mt-2 text-slate-300">I keep my APIs minimal: a few endpoints, one purpose. Node.js + Express handle it gracefully.</p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>app.get("/api/routes", (req, res) =&gt; res.json(routes));</code></pre>
+      <p class="mt-2 text-slate-300">No over-engineering — just reliable JSON backends that talk to the front end instantly.</p>
+
+      <h4 class="mt-6 font-medium text-slate-100">🗃️ MongoDB Atlas — Databases at Hackathon Speed</h4>
+      <p class="mt-2 text-slate-300">
+        When you need a backend in minutes, MongoDB Atlas is unbeatable. Cloud-native, free tier, no deployment hassle.
+        I used it in Kozi.REST to store real-time sensor logs and user summaries, syncing instantly with the dashboard.
+      </p>
+
+      <h4 class="mt-6 font-medium text-slate-100">🔧 Raspberry Pi — When Software Meets Air</h4>
+      <p class="mt-2 text-slate-300">
+        My go-to lab bench for ideas that need sensors. Whether it’s I²C readings from CCS811 or motion data from an MPU6050, the Pi runs simple Python scripts that validate hardware before scaling to production IoT.
+      </p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>import smbus2, time
+bus = smbus2.SMBus(1)</code></pre>
+      <p class="mt-2 text-slate-300">That’s how Kozi.REST came to life — a small sleep-tracking device that talked to an AI backend.</p>
+
+      <h4 class="mt-6 font-medium text-slate-100">🧾 References</h4>
+      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+        <li>Meta AI (2024). Segment Anything Model 2 (SAM2).</li>
+        <li>Esri (2023). ArcGIS Pro Documentation.</li>
+        <li>PyTorch (2024). Getting Started with CUDA.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Blog Modal: SAM2 (converted from your Windows setup PDF; no external PDF embed) -->
+  <div id="modal-sam2" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">SAM 2 Installation &amp; Overview — Windows Setup + Geospatial Integration</h3>
+        <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+      </div>
+
+      <p class="mt-3 text-slate-300">
+        Getting Meta’s Segment Anything Model 2.1 (SAM 2.1) running on Windows comes down to a clean Python env, the right PyTorch ⇄ CUDA combo, and the model checkpoints. Here’s the streamlined path I use on Windows.
+      </p>
+
+      <h4 class="mt-5 font-medium text-slate-100">1) Environment &amp; PyTorch (CUDA)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># create &amp; activate (venv example; conda works too)
+python -m venv .venv
+.\.venv\Scripts\activate
+
+# install PyTorch matching your CUDA (example: CUDA 12.4)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+
+# core deps
+pip install opencv-python matplotlib notebook rasterio shapely</code></pre>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># verify CUDA availability &amp; versions
+python -c "import torch; print(torch.cuda.is_available(), torch.version.cuda)"</code></pre>
+
+      <h4 class="mt-5 font-medium text-slate-100">2) Clone &amp; Install SAM2</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>git clone https://github.com/facebookresearch/segment-anything-2.git
+cd segment-anything-2
+pip install -e .</code></pre>
+      <p class="mt-2 text-slate-300">
+        If the repo ships a <code>download_ckpts.sh</code> script, run it under Git Bash/WSL or download checkpoints manually from the model card and place them in a known folder (e.g., <code>./checkpoints/</code>).
+      </p>
+
+      <h4 class="mt-5 font-medium text-slate-100">3) Quick GPU Smoke Test</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>import torch, cv2
+from segment_anything_2 import build_sam2
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = build_sam2(checkpoint="checkpoints/sam2_hiera_b+.pt").to(device)
+
+img = cv2.imread("your_image.jpg")[:,:,::-1]  # BGR→RGB
+# minimal point prompt example (x=100,y=150)
+point = [[100,150]]; label = [1]
+mask = model.segment(img, point_coords=point, point_labels=label)
+print("Mask shape:", mask.shape)</code></pre>
+
+      <h4 class="mt-5 font-medium text-slate-100">4) Troubleshooting Notes</h4>
+      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+        <li>Match PyTorch wheel to your installed CUDA (and VS 2022 C++ build tools for any native extensions).</li>
+        <li>If <code>pip install -e .[demo]</code> is flaky on Windows, install listed demo deps individually (OpenCV, Matplotlib, Jupyter).</li>
+        <li>If CUDA isn’t detected, verify your PATHs and <code>torch.cuda.is_available()</code>.</li>
+      </ul>
+
+      <h4 class="mt-6 font-medium text-slate-100">How SAM 2.1 Works (Quick Tour)</h4>
+      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-2">
+        <li><span class="text-slate-200">Image Encoder (Hiera ViT)</span>: streams frames/images into multiscale embeddings.</li>
+        <li><span class="text-slate-200">Prompt Encoder</span>: points/boxes (sparse) and masks (dense) guide what to segment.</li>
+        <li><span class="text-slate-200">Memory Bank + Attention</span>: for videos, past-frame features guide current masks.</li>
+        <li><span class="text-slate-200">Mask Decoder</span>: transformer head outputs masks (and “object absent” when needed).</li>
+        <li><span class="text-slate-200">Memory Encoder</span>: writes current-frame results back to memory for future frames.</li>
+      </ul>
+
+      <h4 class="mt-6 font-medium text-slate-100">5) Geospatial: Segment-Geospatial (SAM on GeoTIFF)</h4>
+      <p class="mt-2 text-slate-300">
+        Use <code>segment-geospatial</code> to run SAM/SAM2 on NAIP/CHM or other GeoTIFFs and export vectors for GIS.
+      </p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>pip install segment-geospatial</code></pre>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># Automatic mask generation (whole image)
+from samgeo import SamGeo2
+sam = SamGeo2(automatic=True, model_id="sam2-hiera-large")
+sam.generate(image="sample_naip.tif", output="output_mask.tif")</code></pre>
+      <p class="mt-2 text-slate-300">
+        Large scenes can yield hundreds of segments. If you hit uint8 save errors (IDs &gt; 255), write as uint16 GeoTIFF or vectorize directly.
+      </p>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># Prompted prediction (click-like point)
+sam = SamGeo2(automatic=False, model_id="sam2-hiera-large")
+sam.set_image("sample_naip.tif")
+mask = sam.predict(point_coords=[(x, y)], point_labels=[1])</code></pre>
+
+      <h4 class="mt-6 font-medium text-slate-100">Next Steps</h4>
+      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+        <li>Vectorize masks to GeoJSON/Shapefile and dissolve/clean small fragments.</li>
+        <li>Try HQ-SAM or domain-tuned variants for sharper edges.</li>
+        <li>Batch tiles + optional text prompts (e.g., “building”) for class-specific extractions.</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- Project Modal: Kozi -->
+  <div id="modal-kozi" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">Kozi.REST - AI-Powered Sleep Tracker</h3>
+        <div class="flex gap-2">
+          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://devpost.com/software/nindra" target="_blank" rel="noopener noreferrer">View Devpost</a>
+          <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+        </div>
+      </div>
+      <p class="mt-3 text-slate-300">Kozi.REST is an AI-powered bedside sleep companion designed to help users understand and improve their sleep quality through environmental and behavioral data. I led the integration of Raspberry Pi sensors that monitored ambient temperature, humidity, sound levels, and body motion throughout the night. These readings were processed locally and summarized every morning through an AI-generated audio briefing created with Gemini API and ElevenLabs TTS.
+            The system included a lightweight web dashboard that visualized sleep trends, identified anomalies, and delivered insights into how room conditions affect rest quality. Beyond just logging data, Kozi.REST personalized feedback using an adaptive AI model that adjusted its recommendations over time, bridging hardware sensing with ambient intelligence in a compact IoT setup.</p>
+      <h4 class="mt-4 font-medium">Code Snippet (App route)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">app.post('/summary', async (req, res) => {
+  const data = await db.collection('night_logs').find({ date: today() }).toArray();
+  const summary = await gemini.summarize(data);
+  const mp3 = await elevenlabs.tts(summary);
+  await sendToPi(mp3);
+  res.json({ ok: true });
+});</code></pre>
+      <h4 class="mt-4 font-medium">Code Snippet (Pi button → backend)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs"># on the Pi
+GPIO.add_event_detect(BUTTON, GPIO.FALLING, bouncetime=250)
+GPIO.add_event_callback(BUTTON, lambda ch: requests.post(API + '/summary'))</code></pre>
+    </div>
+  </div>
+
+  <!-- Project Modal: RunSafe -->
+  <div id="modal-runsafe" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">RunSafe - Smart Running Tracker</h3>
+        <div class="flex gap-2">
+          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://devpost.com/software/runsafe" target="_blank" rel="noopener noreferrer">View Devpost</a>
+          <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+        </div>
+      </div>
+      <p class="mt-3 text-slate-300">RunSafe was built to make outdoor running safer by merging geospatial analytics with environmental health data. The app retrieves live AQI (air-quality index) data and computes the “healthiest” route among multiple alternatives provided by Google Maps.
+            I developed the backend pipeline that decodes route polylines, samples coordinate points, synchronizes them with hourly AQI data from Open-Meteo, and computes cumulative exposure scores for each route. The client visualizes these scores as color-graded paths, giving runners real-time comparisons.
+            RunSafe also allows users to log daily symptoms (like coughing or fatigue) and auto-generates weekly health reports in PDF, formatted for physician review. The project was inspired by the Rice IDSO Challenge on Air Quality & Lung Health and aims to connect environmental data with individual health outcomes.</p>
+      <h4 class="mt-4 font-medium">Code Snippet (AQI exposure)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">const exposure = points.reduce((sum, p, i) => sum + aqiAt(p.time, p.lat, p.lng) * segLen(points[i-1], p), 0);
+const best = routes.sort((a,b) => a.exposure - b.exposure)[0];</code></pre>
+      <h4 class="mt-4 font-medium">Code Snippet (Polyline decode)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">import polyline
+points = polyline.decode(route.overview_polyline)
+# sample every ~50m for AQI lookups
+sampled = sample_points(points, step=50)</code></pre>
+    </div>
+  </div>
+
+  <!-- Project Modal: Baymax -->
+  <div id="modal-baymax" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">Baymax - AI Therapist </h3>
+        <div class="flex gap-2">
+          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://devpost.com/software/baymax-jqlo2b" target="_blank" rel="noopener noreferrer">View Devpost</a>
+          <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+        </div>
+      </div>
+      <p class="mt-3 text-slate-300">Baymax is a virtual companion designed to provide accessible mental-health support through natural conversation and personalized recommendations. I handled the backend architecture—building a secure RESTful API, integrating MongoDB Atlas for encrypted session storage, and linking Stripe API for subscription-based access.
+            The app leverages GPT-powered dialogue to simulate empathy-driven conversation while preserving data privacy and maintaining clinical relevance through curated response sets. The project’s goal was to bridge the gap between immediate emotional support and professional therapy access by offering a responsive, human-like interface for early-stage intervention.</p>
+      <h4 class="mt-4 font-medium">Code Snippet (session create)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">router.post('/session', async (req, res) => {
+  const user = await users.ensure(req.body.email);
+  const sess = await db.collection('sessions').insertOne({ userId: user._id, createdAt: new Date() });
+  res.json(sess);
+});</code></pre>
+      <h4 class="mt-4 font-medium">Code Snippet (Stripe checkout)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">const session = await stripe.checkout.sessions.create({
+  mode: 'subscription',
+  line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+  success_url: ORIGIN + '/app',
+  cancel_url: ORIGIN + '/pricing'
+});</code></pre>
+    </div>
+  </div>
+
+  <!-- Project Modal: Dristi -->
+  <div id="modal-dristi" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">Dristi - Smart Cane for Visually Impaired</h3>
+        <div class="flex gap-2">
+          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://devpost.com/software/project-dristi" target="_blank" rel="noopener noreferrer">View Devpost</a>
+          <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+        </div>
+      </div>
+      <p class="mt-3 text-slate-300">Dristi (“vision” in Nepali) is a smart mobility aid designed to enhance independence and safety for visually impaired individuals. Built entirely on Raspberry Pi OS, the prototype uses ultrasonic sensors to detect obstacles and GPS for navigation guidance.
+            I engineered the system logic that triggers haptic feedback when objects are detected within defined proximity thresholds and synchronized alert intensity based on obstacle distance and direction. The project demonstrated how low-cost hardware and intelligent sensor fusion can transform assistive technologies—prioritizing accessibility, affordability, and real-time responsiveness.</p>
+      <h4 class="mt-4 font-medium">Code Snippet (haptics)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">if (distance <= 50) {
+  motor.vibrate(map(distance, 0, 50, 255, 80));
+}</code></pre>
+      <h4 class="mt-4 font-medium">Code Snippet (Ultrasonic read)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">def distance_cm():
+  GPIO.output(TRIG, True); time.sleep(0.00001); GPIO.output(TRIG, False)
+  start, end = pulse_in(ECHO)
+  return (end - start) * 17150</code></pre>
+    </div>
+  </div>
+
+  <!-- Project Modal: MyGarage -->
+  <div id="modal-garage" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">MyGarage - A Simple Car Tracker</h3>
+        <div class="flex gap-2">
+          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://github.com/himalgtm/MyGarage" target="_blank" rel="noopener noreferrer">View Repo</a>
+          <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
+        </div>
+      </div>
+      <p class="mt-3 text-slate-300">MyGarage is a clean and minimal web app I built to keep track of the cars. It lets me add details like the make, model, year, mileage, fuel type, VIN number, and more. If anything changes like mileage or service date; I can update it. And when I no longer need a car in the list, I can easily delete it. What makes it more fun (and useful) is the Scan VIN feature. Instead of typing out the full 17-character VIN, I can just click a button, open my camera, and it reads the VIN directly from the image using Google Vision OCR. It’s quick, accurate, and saves time. The app is built using Node.js, Express, and MongoDB (via MongoDB Compass) running locally to store all the car data. It also uses WebSockets to sync changes across tabs or devices in real time so if I update something on my phone, it instantly updates on my laptop too. The frontend is built with vanilla JavaScript and Tailwind CSS for a simple but sharp retro look.</p>
+      <h4 class="mt-4 font-medium">Code Snippet (tooling)</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto"><code class="text-xs">#!/usr/bin/env bash
+# bootstrap a new package
+pnpm create vite my-tool --template react
+cd my-tool && pnpm i</code></pre>
+    </div>
+  </div>
+
+  <!-- Ambient Layers injected by JS -->
+  <canvas id="fx-stars"></canvas>
+  <div id="fx-aurora" aria-hidden="true"></div>
+
+  <script>
+    // ---------- Footer year ----------
+    const yrEl = document.getElementById('yr');
+    if (yrEl) yrEl.textContent = new Date().getFullYear();
+
+    // ---------- Modal Manager (projects/blogs) ----------
+    (function modalManager () {
+      const overlay = document.getElementById('modal-overlay');
+      if (!overlay) return;
+
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+
+      function closeAllModals() {
+        overlay.classList.add('hidden');
+        // FIX: make sure we target all modals via .modal class
+        document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+        document.body.classList.remove('overflow-hidden');
+      }
+
+      // Triggers: <button data-modal="modal-kozi">
+      document.querySelectorAll('[data-modal]').forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+          e.preventDefault();
+          openModal(trigger.dataset.modal);
+        });
+      });
+
+      // Close: click backdrop or any [data-close]
+      overlay.addEventListener('click', closeAllModals);
+      document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-close]')) closeAllModals();
+      });
+
+      // ESC to close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAllModals();
+      });
+    })();
+
+    // ---------- Experience Accordion (one-open-at-a-time, smooth) ----------
+    (function experienceAccordion () {
+      const items = document.querySelectorAll('.exp-item');
+      if (!items.length) return;
+
+      function expand(panel) {
+        panel.classList.remove('hidden');
+        panel.style.maxHeight = '0px';
+        panel.style.opacity = '0';
+        requestAnimationFrame(() => {
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          panel.style.opacity = '1';
+        });
+      }
+
+      function collapse(panel) {
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        requestAnimationFrame(() => {
+          panel.style.maxHeight = '0px';
+          panel.style.opacity = '0';
+        });
+        panel.addEventListener('transitionend', function onEnd(ev) {
+          if (ev.propertyName !== 'max-height') return;
+          panel.classList.add('hidden');
+          panel.removeEventListener('transitionend', onEnd);
+        });
+      }
+
+      function closeAllAccordions() {
+        document.querySelectorAll('.exp-panel').forEach(p => {
+          if (!p.classList.contains('hidden')) collapse(p);
+        });
+        document.querySelectorAll('.exp-item').forEach(b => {
+          b.setAttribute('aria-expanded', 'false');
+          const c = b.querySelector('.chev');
+          if (c) c.style.transform = 'rotate(0deg)';
+        });
+      }
+
+      items.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const panel = document.getElementById(targetId);
+          if (!panel) return;
+          const isOpen = !panel.classList.contains('hidden');
+
+          closeAllAccordions();
+          if (!isOpen) {
+            expand(panel);
+            btn.setAttribute('aria-expanded', 'true');
+            const chev = btn.querySelector('.chev');
+            if (chev) chev.style.transform = 'rotate(180deg)';
+          }
+        });
+
+        // keep height correct on responsive changes
+        const panel = document.getElementById(btn.dataset.target);
+        if (panel) {
+          const ro = new ResizeObserver(() => {
+            if (!panel.classList.contains('hidden')) {
+              panel.style.maxHeight = panel.scrollHeight + 'px';
+            }
+          });
+          ro.observe(panel);
+        }
+      });
+
+    })();
+  </script>
+  
+   <script>
+    // Footer year
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    // ===== Global Moving Map (full page) =====
+    (function () {
+      const el = document.getElementById('moving-map');
+      if (!el) return;
+      const base = { lat: 33.2148, lng: -97.1331 }; // Denton, TX
+
+      const map = L.map(el, {
+        center: [base.lat, base.lng],
+        zoom: 12,
+        zoomControl: false,
+        attributionControl: false,
+        dragging: false, scrollWheelZoom: false, doubleClickZoom: false,
+        boxZoom: false, keyboard:false, tap:false, touchZoom:false, inertia:false
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains:'abcd', maxZoom: 19
+      }).addTo(map);
+
+      const pulseIcon = L.divIcon({ className:'', html:'<div class="pulse-pin"></div>', iconSize:[12,12], iconAnchor:[6,6] });
+      const marker = L.marker([base.lat, base.lng], { icon: pulseIcon }).addTo(map);
+
+      let t = 0, rLat = 0.015, rLng = 0.02, speed = 0.0038;
+      function drift(){
+        t += speed;
+        const lat = base.lat + rLat * Math.sin(t * 0.9);
+        const lng = base.lng + rLng * Math.cos(t * 0.7);
+        map.panTo([lat, lng], { animate:true, duration:1.2 });
+        marker.setLatLng([lat, lng]);
+        requestAnimationFrame(drift);
+      }
+      drift();
+
+      new ResizeObserver(() => map.invalidateSize()).observe(el);
+    })();
+
+    // ===== Starfield =====
+    (function() {
+      const cvs = document.getElementById('stars'); const ctx = cvs.getContext('2d');
+      let w, h, stars=[];
+      function resize(){
+        w = cvs.width  = innerWidth;
+        h = cvs.height = innerHeight;
+        const n = Math.min(260, Math.floor((w*h)/20000));
+        stars = Array.from({length:n}, () => ({
+          x: Math.random()*w, y: Math.random()*h, z: Math.random()*0.8+.2,
+          a: Math.random(), vx:(Math.random()*.08+.02)*(Math.random()<.5?-1:1), vy:(Math.random()*.04+.01)
+        }));
+      }
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        for(const s of stars){
+          s.x += s.vx*s.z; s.y += s.vy*s.z;
+          if (s.x<0) s.x=w; if (s.x>w) s.x=0; if (s.y>h) s.y=0;
+          ctx.globalAlpha = s.a*.85; ctx.fillStyle='rgba(148,163,184,0.95)'; ctx.fillRect(s.x,s.y,1.2*s.z,1.2*s.z);
+        }
+        requestAnimationFrame(tick);
+      }
+      addEventListener('resize', resize); resize(); tick();
+    })();
+
+    // ===== Modals =====
+    (function() {
+      const overlay = document.getElementById('overlay');
+      function open(id){ const m=document.getElementById(id); if(!m) return; m.classList.remove('hidden'); overlay.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); }
+      function closeAll(){ overlay.classList.add('hidden'); document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden')); document.body.classList.remove('overflow-hidden'); }
+      document.querySelectorAll('[data-modal]').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); open(btn.dataset.modal); }));
+      overlay.addEventListener('click', closeAll); document.addEventListener('click', e => { if (e.target.matches('[data-close]')) closeAll(); });
+      document.addEventListener('keydown', e => { if (e.key==='Escape') closeAll(); });
+    })();
+
+    // ===== Experience accordion =====
+    (function(){
+      const items = document.querySelectorAll('.exp-item');
+      function expand(p){ p.classList.remove('hidden'); p.style.maxHeight='0px'; p.style.opacity='0'; requestAnimationFrame(()=>{ p.style.maxHeight=p.scrollHeight+'px'; p.style.opacity='1'; }); }
+      function collapse(p){ p.style.maxHeight=p.scrollHeight+'px'; requestAnimationFrame(()=>{ p.style.maxHeight='0px'; p.style.opacity='0'; }); p.addEventListener('transitionend', function onEnd(ev){ if(ev.propertyName!=='max-height') return; p.classList.add('hidden'); p.removeEventListener('transitionend',onEnd); }); }
+      function closeAll(){ document.querySelectorAll('.exp-panel').forEach(p=>{ if(!p.classList.contains('hidden')) collapse(p); }); document.querySelectorAll('.exp-item').forEach(b=>{ b.setAttribute('aria-expanded','false'); b.querySelector('.chev').style.transform='rotate(0deg)'; }); }
+      items.forEach(btn=>{
+        btn.addEventListener('click',()=>{ const p=document.getElementById(btn.dataset.target); if(!p) return; const isOpen=!p.classList.contains('hidden'); closeAll(); if(!isOpen){ expand(p); btn.setAttribute('aria-expanded','true'); btn.querySelector('.chev').style.transform='rotate(180deg)'; } });
+      });
+    })();
+
+    // ===== Magnetic + Ripple buttons =====
+    (function(){
+      const MAG = 10;
+      document.querySelectorAll('.btn, a.btn, button.btn').forEach(el=>{
+        let raf;
+        el.addEventListener('mousemove', e=>{
+          const r=el.getBoundingClientRect(); const dx=(e.clientX-(r.left+r.width/2))/(r.width/2); const dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
+          cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ el.style.transform=`translate(${dx*MAG}px, ${dy*MAG}px)`; });
+        });
+        el.addEventListener('mouseleave', ()=>{ cancelAnimationFrame(raf); el.style.transform='translate(0,0)'; });
+        el.addEventListener('click', e=>{ const r=el.getBoundingClientRect(); el.style.setProperty('--rx', (e.clientX-r.left)+'px'); el.style.setProperty('--ry',(e.clientY-r.top)+'px'); el.classList.remove('rippling'); void el.offsetWidth; el.classList.add('rippling'); setTimeout(()=>el.classList.remove('rippling'), 700); });
+      });
+    })();
+  </script>
+
+</body>
+
+<style>
+  /* shared button icon layout */
+  .btn-icon {
+    display: inline-flex; align-items: center; gap: .5rem;
+    transition: transform .18s ease, background-color .18s ease, border-color .18s ease;
+    will-change: transform;
+  }
+  .btn-icon:active { transform: translateY(1px) scale(.99); }
+
+  /* Devpost logo sizing */
+  .icon-devpost { width: 18px; height: 18px; display: inline-block; }
+  .icon-devpost .hex { fill: #00B5E2; }          /* Devpost brand teal */
+  .icon-devpost .letter { fill: #0b1220; }       /* your page bg for cutout effect */
+  .btn-icon:hover .icon-devpost { transform: translateZ(0); }
+
+  /* Animated close “X” */
+  .close-icon { position: relative; width: 16px; height: 16px; display:inline-block; }
+  .close-icon::before, .close-icon::after{
+    content:""; position:absolute; left:50%; top:50%;
+    width: 16px; height: 2px; background: currentColor; border-radius: 2px;
+    transform-origin: center; transition: transform .22s ease;
+  }
+  .close-icon::before{ transform: translate(-50%,-50%) rotate(45deg); }
+  .close-icon::after { transform: translate(-50%,-50%) rotate(-45deg); }
+  /* On hover/focus, rotate the whole X for a subtle flourish */
+  [data-close].btn-icon:hover .close-icon,
+  [data-close].btn-icon:focus-visible .close-icon { transform: rotate(90deg); }
+</style>
+<script>
+  (function enhanceModalButtons(){
+    // --- Devpost logo SVG (inline, tiny) ---
+    const DEVPOST_SVG = `
+      <svg class="icon-devpost" viewBox="0 0 256 256" aria-hidden="true">
+        <path class="hex" d="M128 10 233 70v116l-105 60L23 186V70z"/>
+        <path class="letter" d="M86 66h56c34 0 62 29 62 62s-28 62-62 62H86V66zm38 28v68h17c19 0 34-15 34-34s-15-34-34-34h-17z"/>
+      </svg>`;
+
+    // Add Devpost icon to any modal header link that points to devpost.com
+    document.querySelectorAll('.modal a[href*="devpost.com"]').forEach(btn=>{
+      if (!btn.querySelector('.icon-devpost')) {
+        btn.classList.add('btn-icon');
+        btn.insertAdjacentHTML('afterbegin', DEVPOST_SVG);
+      }
+    });
+
+    // Add animated close icon to every [data-close] button
+    document.querySelectorAll('.modal [data-close]').forEach(btn=>{
+      if (!btn.querySelector('.close-icon')) {
+        btn.classList.add('btn-icon');
+        btn.insertAdjacentHTML('afterbegin', '<span class="close-icon" aria-hidden="true"></span>');
+      }
+    });
+  })();
+</script>
+</html>
