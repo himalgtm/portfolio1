@@ -29,48 +29,214 @@
 
   <style>
   /* Glass cards + sheen */
-  .fx-card{
-    position:relative; border-radius:1rem;
-    background:linear-gradient(180deg, rgba(15,23,42,.58), rgba(15,23,42,.34));
-    border:1px solid rgba(100,116,139,.35); backdrop-filter: blur(6px);
-    transition: transform .45s cubic-bezier(.2,.6,.2,1), box-shadow .45s cubic-bezier(.2,.6,.2,1), border-color .35s;
-    box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -12px rgba(0,0,0,.55);
-    z-index:1; /* sit above map */
-  }
-  .fx-card:hover{
-    transform: translateY(-6px) scale(1.01);
-    border-color: rgba(148,163,184,.5);
-    box-shadow: 0 20px 40px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(16,185,129,.15) inset;
-  }
-  .fx-card.card-sheen::after{
-    content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
-    background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 35%, rgba(255,255,255,.02) 55%, transparent 75%);
-    transform:translateX(-120%); transition:transform .9s ease;
-  }
-  .fx-card:hover.card-sheen::after{ transform:translateX(110%); }
+/* ==== ultra-transparent card (no sheen, no shadow) ==== */
+.card-clear.fx-card{
+  background: transparent;            /* let the map show */
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.card-clear.fx-card::before{ display:none; } /* kill lightning band on box */
+.card-clear.fx-card:hover{
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,.12);
+}
 
-  /* Tilt */
-  .fx-tilt{ perspective:800px; transform-style:preserve-3d; }
-  .fx-tilt > .fx-tilt-inner{
-    transition: transform .35s cubic-bezier(.2,.6,.2,1);
-    will-change: transform;
-  }
+/* ==== TEXT-ONLY EFFECTS ==== */
 
-  /* Buttons: magnetic + ripple */
-  .btn{ position:relative; overflow:hidden; isolation:isolate; transition: transform .16s ease; }
-  .btn:active{ transform: translateY(1px) scale(.99); }
-  .btn::after{
-    content:""; position:absolute; width:10px; height:10px;
-    left:var(--rx,-999px); top:var(--ry,-999px);
-    border-radius:999px; background:radial-gradient(circle, rgba(56,189,248,.6), rgba(56,189,248,0) 60%);
-    transform:translate(-50%,-50%) scale(0);
-  }
-  .btn.rippling::after{ animation: ripple .65s ease-out forwards; }
-  @keyframes ripple{ from{transform:translate(-50%,-50%) scale(.15);opacity:.55} to{transform:translate(-50%,-50%) scale(16);opacity:0} }
+/* subtle, continuous shimmer on headings */
+.fx-heading{
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg,#fff,#a7f3d0,#67e8f9,#fff);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lightflow 6s ease-in-out infinite;
+}
+@keyframes lightflow{
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
 
-  /* Make sure map never steals events */
-  #map-wrap{ pointer-events:none; z-index:-3; }
-</style>
+/* body copy—gentle glow, keeps readability on dark map */
+.fx-copy{
+  color: rgba(240,245,255,.88);
+  text-shadow: 0 0 2px rgba(0,0,0,.35);
+  animation: copyglow 7s ease-in-out infinite;
+}
+@keyframes copyglow{
+  0%,100%{opacity:.92; text-shadow:0 0 2px rgba(0,0,0,.35)}
+  50%{opacity:1;   text-shadow:0 0 6px rgba(0,0,0,.45)}
+}
+
+/* optional: quiet dividers on clear cards */
+.card-clear .fx-divider{
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* ===== Modal base ===== */
+.modal.hidden { display: none; }
+.modal {
+  position: fixed; inset: 0; z-index: 70;
+  /* very transparent backdrop with subtle vignette + blur */
+  background:
+    radial-gradient(1200px 600px at 50% 10%, rgba(15,23,42,.28), transparent 60%),
+    rgba(2,6,23,.25);
+  backdrop-filter: blur(6px) saturate(110%);
+}
+
+/* click anywhere outside the panel to close */
+.modal-backdrop{
+  position:absolute; inset:0; background:transparent; border:none; cursor:default;
+}
+
+/* glass panel (no heavy drop shadow) */
+.modal-panel{
+  position: relative; z-index: 1;
+  margin: min(7vh,5rem) auto;
+  max-width: 980px;
+  padding: 20px 20px 24px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15,23,42,.44), rgba(15,23,42,.28));
+  border: 1px solid rgba(148,163,184,.28);
+  backdrop-filter: blur(14px) saturate(120%);
+  /* soft inner highlight, no outer shadow */
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset;
+  animation: modalPop .35s cubic-bezier(.2,.7,.2,1);
+}
+
+@keyframes modalPop {
+  from { transform: translateY(8px) scale(.985); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* close button */
+.modal-close{
+  width: 36px; height: 36px; border-radius: 10px;
+  display:grid; place-items:center;
+  color: #94a3b8; background: rgba(15,23,42,.35);
+  border: 1px solid rgba(148,163,184,.25);
+  transition: transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+}
+.modal-close:hover{
+  transform: translateY(-1px);
+  background: rgba(15,23,42,.45);
+  color: #e2e8f0; border-color: rgba(148,163,184,.45);
+}
+
+/* small chips */
+.chip{
+  display:inline-block; padding:.25rem .55rem; border-radius:999px;
+  font-size:.8rem; color:#cbd5e1;
+  background: rgba(30,41,59,.4);
+  border:1px solid rgba(148,163,184,.22);
+  backdrop-filter: blur(6px);
+}
+
+/* picture frames */
+.gallery-pic{
+  overflow:hidden; border-radius:14px;
+  background: rgba(15,23,42,.35);
+  border:1px solid rgba(148,163,184,.26);
+  aspect-ratio: 4/3;
+}
+.gallery-pic img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+/* tiny stats */
+.mini-stat{
+  padding:.75rem .85rem; border-radius:14px;
+  background: rgba(15,23,42,.35);
+  border:1px solid rgba(148,163,184,.22);
+  text-align:center;
+}
+.mini-stat-k{ font-weight:700; font-size:1.15rem; color:#e2e8f0; letter-spacing:.2px; }
+.mini-stat-t{ font-size:.78rem; color:#94a3b8; }
+
+/* soft buttons */
+.btn-soft{
+  padding:.55rem .9rem; border-radius:12px; font-weight:500;
+  color:#e2e8f0; background: rgba(15,23,42,.42);
+  border:1px solid rgba(148,163,184,.26);
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.btn-soft:hover{
+  transform: translateY(-1px);
+  border-color: rgba(148,163,184,.45);
+  background: rgba(15,23,42,.5);
+}
+
+/* Panel look: lighter glass, no heavy shadow */
+.modal-panel{
+  width:min(980px, 92vw);
+  margin-inline:auto;
+  margin-top:6vh;
+  background:linear-gradient(180deg, rgba(9,14,24,.60), rgba(9,14,24,.40));
+  border:1px solid rgba(148,163,184,.25);
+  backdrop-filter: blur(10px);
+  border-radius:18px;
+  padding:22px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.05) inset;
+}
+
+/* Chips */
+.chip{
+  font-size:.75rem; line-height:1; padding:.35rem .55rem;
+  color:#a5f3fc; background:rgba(14,165,233,.12);
+  border:1px solid rgba(56,189,248,.22);
+  border-radius:999px;
+}
+
+/* Tabs */
+.tabs{ position:relative; display:flex; gap:.5rem; border-bottom:1px dashed rgba(148,163,184,.22); }
+.tab{
+  position:relative; padding:.5rem .8rem; border-radius:.5rem; font-weight:500;
+  color:#cbd5e1; transition:background .2s ease, color .2s ease;
+}
+.tab:hover{ background:rgba(148,163,184,.08); color:#e2e8f0; }
+.tab.is-active{ color:#e2e8f0; }
+.tab-underline{
+  --x:0; --w:64px;
+  position:absolute; bottom:-1px; height:2px; width:var(--w); left:var(--x);
+  background:linear-gradient(90deg,#34d399,#22d3ee);
+  border-radius:4px; transition:left .3s cubic-bezier(.2,.6,.3,1), width .3s cubic-bezier(.2,.6,.3,1);
+}
+
+/* Copy */
+.subhead{ font-weight:600; color:#e2e8f0; margin-bottom:.25rem; }
+.bullet{ list-style: disc; margin-left:1.1rem; color:#cbd5e1; }
+.pull-quote{
+  position:relative; padding-left:1rem; color:#e2e8f0;
+}
+.pull-quote::before{
+  content:""; position:absolute; left:0; top:.35rem; bottom:.35rem;
+  width:3px; border-radius:2px; background:linear-gradient(#34d399,#22d3ee);
+  opacity:.7;
+}
+
+/* Photos */
+.profile-card{ border:1px solid rgba(148,163,184,.22); border-radius:14px; padding:8px; background:rgba(15,23,42,.25); }
+.profile-main{ width:100%; aspect-ratio: 4/3; object-fit:cover; border-radius:10px; }
+.profile-sub{ width:100%; aspect-ratio: 1/1; object-fit:cover; border-radius:10px; border:1px solid rgba(148,163,184,.2); }
+
+/* Stats */
+.stat{ border:1px solid rgba(148,163,184,.22); border-radius:12px; padding:14px; background:rgba(15,23,42,.2); }
+.stat-k{ font-weight:700; font-size:1.15rem; color:#e2e8f0; }
+.stat-l{ color:#94a3b8; font-size:.9rem; }
+
+/* Close button */
+.icon-btn{
+  width:36px; height:36px; display:grid; place-items:center;
+  border-radius:10px; color:#93c5fd; border:1px solid rgba(147,197,253,.25);
+  background:rgba(29,78,216,.10);
+}
+.icon-btn:hover{ background:rgba(29,78,216,.16); }
+
+
+/* Divider line that stays subtle */
+.fx-divider{ border-top: 1px dashed rgba(148,163,184,.18); }
 
 
   <style>
@@ -106,26 +272,7 @@
     }
     @keyframes aurora { 0%{transform:translate3d(0,0,0) rotate(0)} 50%{transform:translate3d(0,-2%,0) rotate(2deg)} 100%{transform:translate3d(0,0,0) rotate(0)} }
 
-    /* ===== Glass Cards ===== */
-    .card-glass{
-      position:relative; border-radius:1rem;
-      background:linear-gradient(180deg, rgba(15,23,42,.55), rgba(15,23,42,.35));
-      border:1px solid rgba(100,116,139,.35); backdrop-filter: blur(6px);
-      transition: transform .45s cubic-bezier(.2,.6,.2,1), box-shadow .45s cubic-bezier(.2,.6,.2,1), border-color .35s, background .6s;
-      box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -12px rgba(0,0,0,.55);
-    }
-    .card-glass:hover{
-      transform: translateY(-6px) scale(1.01);
-      border-color: rgba(148,163,184,.5);
-      box-shadow: 0 20px 40px -20px rgba(0,0,0,.65), 0 0 0 1px rgba(16,185,129,.15) inset;
-    }
-    .card-sheen::after{
-      content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
-      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 35%, rgba(255,255,255,.02) 55%, transparent 75%);
-      transform: translateX(-120%); transition: transform .9s ease;
-    }
-    .card-glass:hover.card-sheen::after{ transform: translateX(110%); }
-
+    
     /* ===== Buttons: magnetic + ripple ===== */
     .btn { position:relative; overflow:hidden; isolation:isolate; transition: transform .16s ease; }
     .btn:active { transform: translateY(1px) scale(.99); }
@@ -153,7 +300,95 @@
     /* ===== Utilities ===== */
     .grid-bg{ background-image: linear-gradient(to right, rgba(148,163,184,.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,.06) 1px, transparent 1px); background-size:24px 24px; }
   </style>
+
+  <style>
+/* === Unified glass overlay for ALL .modal elements === */
+
+.modal{ position:fixed; inset:0; z-index:61; display:none; padding:1rem; overflow-y:auto; }
+.modal.show{ display:block; }
+
+/* Dim + blur backdrop so the map is still visible */
+.modal::before{
+  content:""; position:fixed; inset:0;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(16,185,129,.07), transparent 60%),
+    radial-gradient(900px 600px at 80% 90%, rgba(56,189,248,.07), transparent 55%),
+    rgba(2,6,23,.42);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+}
+
+/* Your inner container already uses max-w-3xl/4xl/5xl — we style those panels */
+.modal > .max-w-3xl,
+.modal > .max-w-4xl,
+.modal > .max-w-5xl{
+  position:relative;
+  border-radius:1rem;
+  border:1px solid rgba(148,163,184,.25);
+  background:linear-gradient(180deg, rgba(15,23,42,.62), rgba(15,23,42,.46));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 30px -12px rgba(0,0,0,.55);
+  animation: modalFloat 12s ease-in-out infinite;
+  overflow:hidden;
+}
+
+/* Continuous gentle sheen across the panel */
+.modal > .max-w-3xl::after,
+.modal > .max-w-4xl::after,
+.modal > .max-w-5xl::after{
+  content:""; position:absolute; inset:-1px; pointer-events:none;
+  background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.08) 35%, rgba(255,255,255,.02) 55%, transparent 75%);
+  transform:translateX(-120%);
+  animation: sheen 9s linear infinite;
+}
+
+/* Make any old solid bg/border on your inner div transparent */
+.modal .bg-slate-900{ background-color:transparent!important; }
+.modal .border-slate-800{ border-color:rgba(148,163,184,.25)!important; }
+
+/* Buttons inside modals (Close / Links) */
+.modal [data-close],
+.modal .icon-btn,
+.modal a[href][target="_blank"]{
+  border:1px solid rgba(148,163,184,.25);
+  background:rgba(15,23,42,.4);
+  border-radius:.75rem;
+  transition:border-color .2s ease, background .2s ease, transform .15s ease;
+}
+.modal [data-close]:hover,
+.modal .icon-btn:hover,
+.modal a[href][target="_blank"]:hover{
+  border-color:rgba(148,163,184,.45);
+  background:rgba(15,23,42,.55);
+  transform:translateY(-1px);
+}
+
+/* Code blocks harmony */
+.modal pre{
+  background:rgba(2,6,23,.75)!important;
+  border:1px solid rgba(100,116,139,.3)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+/* Decorative pull-quote (if present) */
+.modal .pull-quote, .modal blockquote{
+  border-left:3px solid rgba(16,185,129,.6);
+  padding-left:.9rem; border-radius:.25rem;
+  background:linear-gradient(90deg, rgba(16,185,129,.08), transparent 40%);
+}
+
+/* Hover raise */
+.modal > .max-w-3xl:hover,
+.modal > .max-w-4xl:hover,
+.modal > .max-w-5xl:hover{ transform:translateY(-2px); }
+
+/* Animations */
+@keyframes sheen{ 0%{transform:translateX(-120%);} 100%{transform:translateX(110%);} }
+@keyframes modalFloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+</style>
+
+
 </head>
+
 
 <body class="min-h-full">
 
@@ -216,37 +451,42 @@
   </section>
 
 
-<!-- ===== ABOUT / EDUCATION (replacement) ===== -->
-
 <section id="about" class="max-w-6xl mx-auto px-5 py-10">
   <div class="grid md:grid-cols-2 gap-6">
+
     <!-- Education -->
-    <div class="fx-card card-sheen fx-tilt p-5">
+    <div class="fx-card card-clear fx-tilt p-5">
       <div class="fx-tilt-inner">
-        <h2 class="text-xl font-semibold mb-3">Education</h2>
-        <div class="space-y-6 text-slate-200">
+        <h2 class="text-xl mb-3 fx-heading">Education</h2>
+
+        <div class="space-y-6">
           <!-- UNT -->
           <div class="flex items-start gap-4">
             <div class="shrink-0 grid place-items-center w-14 h-14 rounded-full bg-white ring-1 ring-slate-300 shadow-inner">
               <img src="assets/unt_logo.png" alt="UNT" class="max-w-[70%] object-contain">
             </div>
             <div>
-              <div class="font-medium text-white">University of North Texas - Denton, TX</div>
-              <div class="text-sm">B.S. Computer Science + Geographic Information Systems
+              <div class="font-medium fx-copy">University of North Texas - Denton, TX</div>
+              <div class="text-sm fx-copy">
+                B.S. Computer Science + Geographic Information Systems
                 <span class="text-slate-400">(Expected Dec 2027)</span>
               </div>
-              <div class="text-sm mt-1">GPA: 3.89 · Dean’s List</div>
-              <div class="text-sm mt-1">Coursework: Data Structures I, Operating Systems, LiDAR in GIS, DBMS, Full-stack Dev, Prob & Stats</div>
+              <div class="text-sm mt-1 fx-copy">GPA: 3.89 · Dean’s List</div>
+              <div class="text-sm mt-1 fx-copy">
+                Coursework: Data Structures I, Operating Systems, LiDAR in GIS, DBMS, Full-stack Dev, Prob &amp; Stats
+              </div>
             </div>
           </div>
+
           <!-- Caldwell -->
-          <div class="flex items-start gap-4 pt-4 border-t border-slate-800/70">
+          <div class="flex items-start gap-4 pt-4 fx-divider">
             <div class="shrink-0 grid place-items-center w-14 h-14 rounded-full bg-white ring-1 ring-slate-300 shadow-inner">
               <img src="assets/Caldwell_logo.png" alt="Caldwell" class="max-w-[75%] object-contain">
             </div>
             <div>
-              <div class="font-medium text-white">Caldwell University - Caldwell, NJ</div>
-              <div class="text-sm">B.S. Computer Science
+              <div class="font-medium fx-copy">Caldwell University - Caldwell, NJ</div>
+              <div class="text-sm fx-copy">
+                B.S. Computer Science
                 <span class="text-slate-400">(Jan 2024 – May 2025; transferred)</span>
               </div>
             </div>
@@ -254,23 +494,28 @@
         </div>
       </div>
     </div>
+    
+    <!-- ABOUT (trigger) -->
 
-    <!-- About -->
-    <div class="fx-card card-sheen fx-tilt p-6">
+    <div id="about-card" class="fx-card card-clear fx-tilt p-6 cursor-pointer" aria-controls="about-modal" aria-expanded="false">
       <div class="fx-tilt-inner">
-        <h2 class="text-xl font-semibold mb-3">About</h2>
-        <p class="text-slate-300">
+        <h2 class="text-xl mb-3 fx-heading">About</h2>
+        <p class="fx-copy">
+
           Somewhere along the way, I fell in love with both maps and machines. There’s just something about the invisible systems
-          holding our world together; the patterns in satellite images, the logic behind the code humming in the background, that
-          pulls me in. I’m not the guy who knows everything, but I’ll absolutely be the one up at 3AM figuring it out. Whether I’m
-          debugging a Python script, layering field data in ArcGIS, or walking through a forest wondering how LiDAR sees trees;
-          I’m fully in it. Still learning. Still messing up. Still loving every second of it.
+              holding our world together; the patterns in satellite images, the logic behind the code humming in the background, that
+              pulls me in. I’m not the guy who knows everything, but I’ll absolutely be the one up at 3 AM figuring it out. Whether I’m debugging a
+              Python script, layering field data in ArcGIS, or walking through a forest wondering how LiDAR sees trees, I’m fully in it.
+              Still learning, still messing up, and still loving every second of it...
         </p>
+        <div class="mt-4 inline-flex items-center gap-2 text-sky-300/90 text-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" class="inline"><path fill="currentColor" d="M12 2L3 7v6c0 5 3.8 9.7 9 10c5.2-.3 9-5 9-10V7l-9-5Z"/></svg>
+          <span>More about me... </span>
+        </div>
       </div>
     </div>
   </div>
 </section>
-
 
 
   <!-- EXPERIENCE (Compact list -> expandable detail card) -->
@@ -384,7 +629,7 @@
     </div>
     <div class="grid md:grid-cols-2 gap-6">
       <!-- Kozi.REST -->
-      <button data-modal="modal-kozi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+      <button data-open="modal-kozi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-semibold">Kozi.REST - AI-Powered Sleep Tracker</h3>
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackUTA</span>
@@ -393,7 +638,7 @@
       </button>
 
       <!-- RunSafe -->
-      <button data-modal="modal-runsafe" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+      <button data-open="modal-runsafe" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-semibold">RunSafe - Smart Running Tracker</h3>
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackRice</span>
@@ -402,7 +647,7 @@
       </button>
 
       <!-- Baymax -->
-      <button data-modal="modal-baymax" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+      <button data-open="modal-baymax" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-semibold">Baymax - AI Mental Health Assistant</h3>
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackDartmouth</span>
@@ -411,7 +656,7 @@
       </button>
 
       <!-- Dristi -->
-      <button data-modal="modal-dristi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+      <button data-open="modal-dristi" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-semibold">Dristi - Smart Cane </h3>
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackPrinceton</span>
@@ -420,7 +665,7 @@
       </button>
 
       <!-- MyGarage -->
-      <button data-modal="modal-garage" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
+      <button data-open="modal-garage" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
           <h3 class="text-lg font-semibold">MyGarage - A Simple Car Tracker</h3>
         </div>
@@ -431,38 +676,33 @@
 
   <!-- SKILLS -->
 <section id="skills" class="max-w-6xl mx-auto px-5 py-10">
-  <h2 class="text-2xl font-semibold mb-6">Skills</h2>
+  <h2 class="text-2xl font-semibold mb-6 fx-heading">Skills</h2>
 
   <div class="grid md:grid-cols-3 gap-6">
-    <!-- Languages -->
-    <div class="fx-card fx-tilt p-6">
+
+    <div class="fx-card card-clear fx-tilt p-6">
       <div class="fx-tilt-inner">
-        <h3 class="font-medium mb-2">Languages</h3>
-        <p class="text-slate-300">
-          Python, JavaScript, TypeScript, C/C++, Java
-        </p>
+        <h3 class="font-medium mb-2 fx-heading">Languages</h3>
+        <p class="fx-copy">Python, JavaScript, TypeScript, C/C++, Java</p>
       </div>
     </div>
 
-    <!-- Frameworks -->
-    <div class="fx-card fx-tilt p-6">
+    <div class="fx-card card-clear fx-tilt p-6">
       <div class="fx-tilt-inner">
-        <h3 class="font-medium mb-2">Frameworks</h3>
-        <p class="text-slate-300">
-          React, Node.js, Express.js, Tailwind CSS, FastAPI, NumPy, Pandas, Matplotlib
-        </p>
+        <h3 class="font-medium mb-2 fx-heading">Frameworks</h3>
+        <p class="fx-copy">React, Node.js, Express.js, Tailwind CSS, FastAPI, NumPy, Pandas, Matplotlib</p>
       </div>
     </div>
 
-    <!-- Technologies & Tools -->
-    <div class="fx-card fx-tilt p-6">
+    <div class="fx-card card-clear fx-tilt p-6">
       <div class="fx-tilt-inner">
-        <h3 class="font-medium mb-2">Technologies &amp; Tools</h3>
-        <p class="text-slate-300">
+        <h3 class="font-medium mb-2 fx-heading">Technologies &amp; Tools</h3>
+        <p class="fx-copy">
           ArcGIS Pro, Google Earth Engine, PyTorch, CUDA, Git, Linux, MongoDB, SSMS, Lucidchart, PWA, Raspberry Pi
         </p>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -474,7 +714,7 @@
 
     <div class="grid md:grid-cols-3 gap-6">
       <!-- Card 1: SAM2 -->
-      <button data-modal="modal-sam2" class="group relative rounded-xl overflow-hidden border border-slate-800">
+      <button data-open="modal-sam2" class="group relative rounded-xl overflow-hidden border border-slate-800">
         <img src="assets/sam2_cover.png" alt="SAM2" class="w-full h-56 object-cover"/>
         <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
           <div class="flex items-center gap-2 text-xs text-white/90">
@@ -487,7 +727,7 @@
       </button>
 
       <!-- Card 2: Tools -->
-      <button data-modal="modal-tools" class="group relative rounded-xl overflow-hidden border border-slate-800">
+      <button data-open="modal-tools" class="group relative rounded-xl overflow-hidden border border-slate-800">
         <img src="assets/tools.jpg" alt="Tools" class="w-full h-56 object-cover"/>
         <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
           <div class="flex items-center gap-2 text-xs text-white/90">
@@ -528,6 +768,89 @@
   <div id="modal-overlay" class="fixed inset-0 z-[60] hidden bg-black/60"></div>
 
   <!-- MODALS -->
+
+    <!-- ABOUT MODAL (drop-in replacement) -->
+<div id="about-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="about-title">
+  <!-- Backdrop -->
+  <div class="modal-backdrop"></div>
+
+  <!-- Panel -->
+  <div class="modal-panel">
+    <!-- Header -->
+    <div class="flex items-start justify-between gap-4 mb-4">
+      <h2 id="about-title" class="text-2xl md:text-3xl font-semibold tracking-tight">
+        <span class="bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent">Himal Gautam</span>
+      </h2>
+      <button id="about-close" class="icon-btn" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="mt-5 grid md:grid-cols-[1fr,1.3fr] gap-6">
+      <!-- Left: profile card + photos (persistent across tabs on md+) -->
+      <aside class="hidden md:block">
+        <div class="profile-card">
+          <img src="./assets/profile/portrait1.jpg" alt="Portrait 1" class="profile-main" loading="eager">
+          <div class="grid grid-cols-2 gap-2 mt-2">
+            <img src="./assets/profile/portrait2.jpg" alt="Portrait 2" class="profile-sub" loading="lazy">
+            <img src="./assets/profile/portrait3.jpg" alt="Portrait 3" class="profile-sub" loading="lazy">
+          </div>
+        </div>
+      </aside>
+
+      <!-- Right: tab panels -->
+      <section class="min-w-0">
+        <!-- Story -->
+        <div id="tab-story" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-story">
+          <div class="max-w-[62ch] leading-relaxed text-slate-200 space-y-5">
+            <p>
+              I am a computer science and map enthusiast, and a full-time believer that curiosity can build bridges between code and the real world. I spend most days debugging, mapping, or trying to make satellites and algorithms understand the planet a little better.
+            </p>
+            <blockquote class="pull-quote">
+              Outside the screen, I’m usually lost in music or movies. My comfort film is Dead Poets Society, and my Letterboxd is a chaotic mix of coming-of-age stories and existential dramas. My Spotify playlist is just as unpredictable; filled with the all-father rock &amp; roll anthems, soulful vocals, and blues-infused guitars, layered with gospel textures, synth-heavy alternative pop, and the occasional rap-god energy. And when the night gets quiet, it drifts into classical scores: Ludwig Göransson, Hans Zimmer, John Williams, Vivaldi, even a little Beethoven—perfect for overthinking or a late-night study session.
+            </blockquote>
+            <p>
+              I’ve always been drawn to philosophy, especially Advaita Vedanta, and how it explores awareness, existence, and what it means to “know.” I try to meditate when I can, cook when I’m bored, and hit the gym to stay sane. Somewhere between field data, film soundtracks, and lines of Python, I’m trying to build things that make sense of the world—or at least make it a little more beautiful.
+            </p>
+          </div>
+        </div>
+
+        <!-- Snapshots -->
+        <div id="tab-shots" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-btn-shots">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <img src="./assets/profile/portrait1.jpg" alt="Portrait A" class="shot" loading="lazy">
+            <img src="./assets/profile/portrait2.jpg" alt="Portrait B" class="shot" loading="lazy">
+            <img src="./assets/profile/portrait3.jpg" alt="Portrait C" class="shot" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div id="tab-stats" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-btn-stats">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="stat"><div class="stat-k">3.89</div><div class="stat-l">GPA · Dean’s List</div></div>
+            <div class="stat"><div class="stat-k">GIS + CS</div><div class="stat-l">Double-strength toolset</div></div>
+            <div class="stat"><div class="stat-k">SAM-2</div><div class="stat-l">GeoAI segmentation</div></div>
+            <div class="stat"><div class="stat-k">UNT</div><div class="stat-l">Peer Mentor · Research</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobile photos -->
+      <div class="md:hidden">
+        <div class="grid grid-cols-2 gap-2">
+          <img src="./assets/profile/portrait2.jpg" alt="Portrait 2" class="profile-sub" loading="lazy">
+          <img src="./assets/profile/portrait3.jpg" alt="Portrait 3" class="profile-sub" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
   <!-- Blog Modal: Tools (updated with your full content) -->
   <div id="modal-tools" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
     <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
@@ -1044,7 +1367,115 @@ cd my-tool && pnpm i</code></pre>
     })();
   </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  function openModal(m){
+    if(!m){ return; }
+    document.documentElement.style.overflow = 'hidden';
+    m.classList.remove('hidden'); m.classList.add('show');
+    const focusable = m.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    (focusable || m).focus?.({preventScroll:true});
+  }
+  function closeModal(m){
+    if(!m){ return; }
+    m.classList.remove('show'); m.classList.add('hidden');
+    if($$('.modal.show').length===0) document.documentElement.style.overflow='';
+  }
+
+  // OPENERS (works with data-open="#modal-id" or "modal-id")
+  $$('[data-open]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      let sel = btn.getAttribute('data-open')?.trim();
+      if(!sel){ return; }
+      if(!sel.startsWith('#')) sel = '#'+sel;
+      const modal = $(sel);
+      if(!modal){
+        console.warn('Modal not found for', sel, '— check the id/data-open value.');
+        return;
+      }
+      openModal(modal);
+    });
+  });
+
+  // CLOSERS
+  $$('.modal [data-close]').forEach(btn=>{
+    btn.addEventListener('click', ()=> closeModal(btn.closest('.modal')));
+  });
+
+  // BACKDROP CLICK (outside panel)
+  $$('.modal').forEach(m=>{
+    m.addEventListener('mousedown', (e)=>{
+      const panel = m.querySelector('.max-w-3xl, .max-w-4xl, .max-w-5xl');
+      if(panel && !panel.contains(e.target)) closeModal(m);
+    });
+  });
+
+  // ESC to close top-most modal
+  document.addEventListener('keydown', (e)=>{
+    if(e.key==='Escape'){
+      const top = $$('.modal.show').at(-1);
+      if(top) closeModal(top);
+    }
+  });
+});
+</script>
+
+
 </body>
+
+<script>
+  // Open/close
+  const aboutCard  = document.getElementById('about-card');
+  const aboutModal = document.getElementById('about-modal');
+  const aboutClose = document.getElementById('about-close');
+
+  function openAbout(){ aboutModal.classList.remove('hidden'); requestAnimationFrame(()=>aboutModal.classList.add('show')); }
+  function closeAbout(){ aboutModal.classList.remove('show'); setTimeout(()=>aboutModal.classList.add('hidden'), 220); }
+
+  aboutCard?.addEventListener('click', openAbout);
+  aboutClose?.addEventListener('click', closeAbout);
+  aboutModal?.addEventListener('click', (e)=>{ if(e.target === aboutModal) closeAbout(); });
+  window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && !aboutModal.classList.contains('hidden')) closeAbout(); });
+
+  // Tabs
+  const tabs = [
+    { btn: 'tab-btn-story', panel: 'tab-story' },
+    { btn: 'tab-btn-shots', panel: 'tab-shots' },
+    { btn: 'tab-btn-stats', panel: 'tab-stats' },
+  ];
+  const underline = document.querySelector('.tab-underline');
+
+  function setUnderline(el){
+    const r = el.getBoundingClientRect();
+    const host = el.parentElement.getBoundingClientRect();
+    underline.style.setProperty('--x', (r.left - host.left) + 'px');
+    underline.style.setProperty('--w', r.width + 'px');
+  }
+  function activateTab(id){
+    tabs.forEach(({btn,panel})=>{
+      const b = document.getElementById(btn);
+      const p = document.getElementById(panel);
+      const active = btn === id;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+      p.classList.toggle('hidden', !active);
+      if(active) setUnderline(b);
+    });
+  }
+
+  tabs.forEach(({btn})=>{
+    document.getElementById(btn)?.addEventListener('click', ()=>activateTab(btn));
+  });
+  // init underline on first paint
+  window.addEventListener('load', ()=>{
+    const first = document.getElementById('tab-btn-story');
+    if(first) setUnderline(first);
+  });
+</script>
+
 
 <style>
   /* shared button icon layout */
