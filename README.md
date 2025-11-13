@@ -1,7 +1,7 @@
 # portfolio
 # himal.app
 
-Personal site of **Himal Gautam** – CS + GIS student, GeoAI nerd, and builder of random projects that somehow mostly work.
+Personal site of **Himal Gautam**
 
 🌐 Live: https://himal.app  
 📦 Repo: https://github.com/himalgtm/portfolio1
