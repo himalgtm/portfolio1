@@ -27,8 +27,8 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <style>
-  /* Glass cards + sheen */
+<style>
+/* Glass cards + sheen */
 /* ==== ultra-transparent card (no sheen, no shadow) ==== */
 .card-clear.fx-card{
   background: transparent;            /* let the map show */
@@ -232,14 +232,13 @@
   border-radius:10px; color:#93c5fd; border:1px solid rgba(147,197,253,.25);
   background:rgba(29,78,216,.10);
 }
-.icon-btn:hover{ background:rgba(29,78,216,.16); }
+  .icon-btn:hover{ background:rgba(29,78,216,.16); }
 
+  /* Divider line that stays subtle */
+  .fx-divider{ border-top: 1px dashed rgba(148,163,184,.18); }
+</style>
 
-/* Divider line that stays subtle */
-.fx-divider{ border-top: 1px dashed rgba(148,163,184,.18); }
-
-
-  <style>
+<style>
     :root { --bg: #0b1220; }
     html, body { height: 100%; }
     body { background: var(--bg); color: #e5e7eb; }
@@ -386,12 +385,6 @@
 @keyframes modalFloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
 </style>
 
-<style>
-  /* reusable tech chip */
-  .chip{ @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs
-                 bg-slate-800/70 border border-slate-700 text-slate-200; }
-  .chip-dot{ @apply w-1.5 h-1.5 rounded-full inline-block; }
-</style>
 
 </head>
 
@@ -404,7 +397,7 @@
   <div id="aurora" aria-hidden="true"></div>
 
   <!-- HEADER -->
-  <header class="sticky top-0 z-50 backdrop-blur bg-slate-950/70 border-b border-slate-800/60">
+  <header class="fixed inset-x-0 top-0 z-50 backdrop-blur bg-slate-950/70 border-b border-slate-800/60">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="h-14 flex items-center justify-between gap-3">
         <a href="#top" class="font-mono tracking-[0.18em] text-slate-200 hover:text-white text-sm whitespace-nowrap">HIMAL&nbsp;GAUTAM</a>
@@ -706,6 +699,33 @@
       </div>
       </button>
 
+      <!-- Backlog Buddy -->
+    <button
+      data-open="modal-backlog"
+      class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-lg font-semibold">
+          Backlog Buddy - AI Backlog Agent
+        </h3>
+      </div>
+
+      <p class="mt-2 text-slate-300">
+        Tiny Cloudflare Worker &amp; Agents SDK bot that reads a dev backlog and,
+        via chat, suggests the next issue to tackle, git branches, and commands.
+      </p>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span>TypeScript</span>
+        <span class="chip"><span class="chip-dot bg-sky-400"></span>Cloudflare Workers</span>
+        <span class="chip"><span class="chip-dot bg-yellow-400"></span>Agents SDK</span>
+        <span class="chip"><span class="chip-dot bg-cyan-400"></span>Workers AI (Llama&nbsp;3.3)</span>
+        <span class="chip"><span class="chip-dot bg-amber-400"></span>Vanilla HTML</span>
+      </div>
+    </button>
+
+
+
       <!-- MyGarage -->
       <button data-open="modal-garage" class="text-left card rounded-2xl border border-slate-800 bg-slate-900/40 p-6">
         <div class="flex items-center justify-between gap-3">
@@ -898,7 +918,6 @@
     </div>
   </div>
 </div>
-
 
 
   <!-- Blog Modal: Tools (updated with your full content) -->
@@ -1178,13 +1197,96 @@ sampled = sample_points(points, step=50)</code></pre>
     </div>
   </div>
 
+    <div id="modal-backlog" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
+    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold">Backlog Buddy - Cloudflare AI Backlog Agent</h3>
+
+        <div class="flex items-center gap-2">
+          <a
+            href="https://cf-ai-backlog-buddy.backlog-buddy.workers.dev"
+            target="_blank" rel="noreferrer"
+            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-emerald-500/70
+                  text-xs font-medium text-emerald-300 hover:bg-emerald-500/10"
+          >
+            Live Demo
+          </a>
+          <a
+            href="https://github.com/himalgtm/cf-ai-backlog-buddy"
+            target="_blank" rel="noreferrer"
+            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-700
+                  text-xs font-medium text-slate-200 hover:bg-slate-800"
+          >
+            <!-- tiny GitHub mark -->
+            <svg viewBox="0 0 24 24" class="w-4 h-4" aria-hidden="true">
+              <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.38 7.86 10.9.58.11.8-.25.8-.56v-2.1c-3.2.71-3.87-1.39-3.87-1.39-.53-1.36-1.3-1.72-1.3-1.72-1.06-.74.08-.73.08-.73 1.17.08 1.78 1.21 1.78 1.21 1.04 1.79 2.73 1.27 3.4.97.11-.76.41-1.27.74-1.56-2.55-.29-5.23-1.27-5.23-5.64 0-1.25.45-2.27 1.2-3.07-.12-.3-.52-1.53.11-3.18 0 0 .98-.31 3.21 1.17a11.1 11.1 0 0 1 5.85 0c2.23-1.48 3.21-1.17 3.21-1.17.63 1.65.23 2.88.11 3.18.75.8 1.2 1.82 1.2 3.07 0 4.39-2.69 5.34-5.25 5.63.42.36.8 1.06.8 2.15v3.2c0 .31.21.68.81.56A11.51 11.51 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/>
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
+      </div>
+
+      <p class="mt-3 text-slate-300">
+        Backlog Buddy is a small AI agent hosted on Cloudflare that helps a developer triage
+        and act on their issue backlog. You chat with it in plain English, and it replies
+        with a concrete plan: which issue to work on, what git branch to create, and which
+        commands to run next.
+      </p>
+
+      <p class="mt-3 text-slate-300">
+        Under the hood, a <span class="font-medium">BacklogAgent</span> Durable Object stores a seeded
+        list of issues plus recent notes. Each message is appended to that state, then the
+        agent builds a prompt with the backlog + conversation and calls
+        <code class="text-xs bg-slate-950/70 px-1 rounded border border-slate-800">@cf/meta/llama-3.3-70b-instruct-fp8-fast</code>
+        via Workers AI. Responses are streamed back through the Worker to the chat UI.
+      </p>
+
+      <h4 class="mt-4 font-medium">Responsibilities</h4>
+      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
+        <li>Designed the agent’s state model (issues, notes, lastUpdated) on top of Durable Objects.</li>
+        <li>Implemented the chat endpoint and session routing so each URL session maps to its own agent.</li>
+        <li>Built a minimal but responsive HTML chat UI served directly from the Worker.</li>
+      </ul>
+
+      <h4 class="mt-4 font-medium">Key snippet</h4>
+      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>// BacklogAgent — handle chat
+  const result = await env.AI.run(
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+    {
+      messages: [
+        { role: "system", content: systemPromptWithIssues(issues) },
+        { role: "user", content: userMessage }
+      ]
+    }
+  );
+
+  // update notes + lastUpdated, then respond back to the client
+  return jsonResponse({ reply: result, state: { issues, notes, lastUpdated } });</code></pre>
+    </div>
+  </div>
+
+
   <!-- Project Modal: MyGarage -->
   <div id="modal-garage" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
     <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
       <div class="flex items-center justify-between">
         <h3 class="text-xl font-semibold">MyGarage - A Simple Car Tracker</h3>
         <div class="flex gap-2">
-          <a class="px-3 py-1.5 rounded border border-slate-700 hover:bg-slate-800" href="https://github.com/himalgtm/MyGarage" target="_blank" rel="noopener noreferrer">View Repo</a>
+           <a
+            href="https://github.com/himalgtm/MyGarage"
+            target="_blank" rel="noreferrer"
+            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-700
+                  text-xs font-medium text-slate-200 hover:bg-slate-800"
+          >
+            <!-- tiny GitHub mark -->
+            <svg viewBox="0 0 24 24" class="w-4 h-4" aria-hidden="true">
+              <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.38 7.86 10.9.58.11.8-.25.8-.56v-2.1c-3.2.71-3.87-1.39-3.87-1.39-.53-1.36-1.3-1.72-1.3-1.72-1.06-.74.08-.73.08-.73 1.17.08 1.78 1.21 1.78 1.21 1.04 1.79 2.73 1.27 3.4.97.11-.76.41-1.27.74-1.56-2.55-.29-5.23-1.27-5.23-5.64 0-1.25.45-2.27 1.2-3.07-.12-.3-.52-1.53.11-3.18 0 0 .98-.31 3.21 1.17a11.1 11.1 0 0 1 5.85 0c2.23-1.48 3.21-1.17 3.21-1.17.63 1.65.23 2.88.11 3.18.75.8 1.2 1.82 1.2 3.07 0 4.39-2.69 5.34-5.25 5.63.42.36.8 1.06.8 2.15v3.2c0 .31.21.68.81.56A11.51 11.51 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/>
+            </svg>
+            <span>GitHub</span>
+          </a>
+          
           <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
         </div>
       </div>
@@ -1436,14 +1538,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // OPENERS (works with data-open="#modal-id" or "modal-id")
-  $$('[data-open]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      let sel = btn.getAttribute('data-open')?.trim();
-      if(!sel){ return; }
-      if(!sel.startsWith('#')) sel = '#'+sel;
+  $$('[data-open],[data-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      let sel = btn.getAttribute('data-open') || btn.getAttribute('data-modal');
+      if (!sel) return;
+      sel = sel.trim();
+      if (!sel.startsWith('#')) sel = '#' + sel;
       const modal = $(sel);
-      if(!modal){
-        console.warn('Modal not found for', sel, '— check the id/data-open value.');
+      if (!modal) {
+        console.warn('Modal not found for', sel);
         return;
       }
       openModal(modal);
@@ -1472,7 +1575,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-
 
 </body>
 
@@ -1555,6 +1657,7 @@ document.addEventListener('DOMContentLoaded', () => {
   [data-close].btn-icon:hover .close-icon,
   [data-close].btn-icon:focus-visible .close-icon { transform: rotate(90deg); }
 </style>
+
 <script>
   (function enhanceModalButtons(){
     // --- Devpost logo SVG (inline, tiny) ---
@@ -1581,4 +1684,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 </script>
+
+
 </html>
