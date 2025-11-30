@@ -386,6 +386,12 @@
 @keyframes modalFloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
 </style>
 
+<style>
+  /* reusable tech chip */
+  .chip{ @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs
+                 bg-slate-800/70 border border-slate-700 text-slate-200; }
+  .chip-dot{ @apply w-1.5 h-1.5 rounded-full inline-block; }
+</style>
 
 </head>
 
@@ -637,6 +643,14 @@
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackUTA</span>
         </div>
         <p class="mt-2 text-slate-300">Kozi.REST is an AI-powered bedside sleep companion designed to help users understand and improve their sleep quality through environmental and behavioral data...</p>
+        <div class="mt-3 flex flex-wrap gap-2 ">
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> Node.js</span>
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> Python</span>
+        <span class="chip"><span class="chip-dot bg-cyan-400"></span> FastAPI</span>
+        <span class="chip"><span class="chip-dot bg-amber-400"></span> Raspberry Pi</span>
+        <span class="chip"><span class="chip-dot bg-fuchsia-400"></span> ElevenLabs</span>
+        <span class="chip"><span class="chip-dot bg-rose-400"></span> Socket.io</span>
+      </div>
       </button>
 
       <!-- RunSafe -->
@@ -646,6 +660,15 @@
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackRice</span>
         </div>
         <p class="mt-2 text-slate-300">RunSafe was built to make outdoor running safer by merging geospatial analytics with environmental health data. The app retrieves live AQI (air-quality index)...</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> React</span>
+        <span class="chip"><span class="chip-dot bg-indigo-400"></span> Node.js</span>
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> Vite</span>
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> Clerk</span>
+         <span class="chip"><span class="chip-dot bg-emerald-400"></span> Open-Meteo</span>
+        <span class="chip"><span class="chip-dot bg-cyan-400"></span> Google Maps</span>
+        <span class="chip"><span class="chip-dot bg-zinc-300"></span> PDFKit</span>
+      </div>
       </button>
 
       <!-- Baymax -->
@@ -655,6 +678,15 @@
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackDartmouth</span>
         </div>
         <p class="mt-2 text-slate-300">Baymax is a virtual companion designed to provide accessible mental-health support through natural conversation and personalized recommendations. I handled the...</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+        <span class="chip"><span class="chip-dot bg-indigo-400"></span> Express.js</span>
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> React</span>
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> MongoDB Atlas</span>
+        <span class="chip"><span class="chip-dot bg-yellow-400"></span> OpenAI</span>
+        <span class="chip"><span class="chip-dot bg-fuchsia-400"></span> Hugging Face</span>
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> React</span>
+        </div>
+        
       </button>
 
       <!-- Dristi -->
@@ -664,6 +696,14 @@
           <span class="text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">HackPrinceton</span>
         </div>
         <p class="mt-2 text-slate-300">Dristi (“vision” in Nepali) is a smart mobility aid designed to enhance independence and safety for visually impaired individuals. Built entirely on Raspberry Pi OS...</p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> Raspberry Pi</span>
+        <span class="chip"><span class="chip-dot bg-red-400"></span> HTML</span>
+        <span class="chip"><span class="chip-dot bg-yellow-400"></span> Tailwind CSS</span>
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> Python</span>
+        <span class="chip"><span class="chip-dot bg-amber-400"></span> Ultrasonic</span>
+        <span class="chip"><span class="chip-dot bg-cyan-400"></span> GPS</span>
+      </div>
       </button>
 
       <!-- MyGarage -->
@@ -672,6 +712,14 @@
           <h3 class="text-lg font-semibold">MyGarage - A Simple Car Tracker</h3>
         </div>
         <p class="mt-2 text-slate-300">MyGarage is a clean and minimal web app I built to keep track of the cars. It lets me add details like the make, model, year, mileage, fuel type, VIN number, and more... </p>
+       <div class="mt-3 flex flex-wrap gap-2">
+        <span class="chip"><span class="chip-dot bg-sky-400"></span> Vanilla</span>
+        <span class="chip"><span class="chip-dot bg-indigo-400"></span> JavaScript</span>
+        <span class="chip"><span class="chip-dot bg-fuchsia-400"></span> Tailwind</span>
+        <span class="chip"><span class="chip-dot bg-emerald-400"></span> Express.js</span>
+        <span class="chip"><span class="chip-dot bg-amber-400"></span> MongoDB Compass</span>
+        <span class="chip"><span class="chip-dot bg-cyan-400"></span> WebSockets</span>
+        <span class="chip"><span class="chip-dot bg-rose-400"></span> Google Vision OCR</span>
       </button>
     </div>
   </section>
