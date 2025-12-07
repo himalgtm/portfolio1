@@ -406,8 +406,13 @@
           <a href="#experience" class="hover:text-white">Experience</a>
           <a href="#projects" class="hover:text-white">Projects</a>
           <a href="#skills" class="hover:text-white">Skills</a>
-          <a href="#blogs" class="hover:text-white">Blogs</a>
+          <a href="https://himal.blog"
+            class="hover:text-white"
+            target="_blank" rel="noopener noreferrer">
+            Blogs
+          </a>
         </nav>
+
         <div class="shrink-0">
           <div class="flex items-center gap-3 px-4 h-11 rounded-full bg-slate-900/60 backdrop-blur border border-slate-800 ring-1 ring-black/10 relative">
             <span class="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-br from-white/5 via-transparent to-black/10"></span>
@@ -777,52 +782,83 @@
 </section>
 
   <!-- BLOG -->
-  <section id="blogs" class="max-w-6xl mx-auto px-5 py-10">
-    <div class="flex items-end justify-between mb-6">
-      <h2 class="text-2xl font-semibold">Latest from my Blog</h2>
-    </div>
+<section id="blogs" class="max-w-6xl mx-auto px-5 py-10">
+  <div class="flex items-end justify-between mb-6">
+    <h2 class="text-2xl font-semibold">Latest from my Blog</h2>
+  </div>
 
-    <div class="grid md:grid-cols-3 gap-6">
-      <!-- Card 1: SAM2 -->
-      <button data-open="modal-sam2" class="group relative rounded-xl overflow-hidden border border-slate-800">
-        <img src="assets/sam2_cover.png" alt="SAM2" class="w-full h-56 object-cover"/>
-        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
-          <div class="flex items-center gap-2 text-xs text-white/90">
-            <span class="px-2 py-0.5 rounded bg-pink-600">Computer Vision</span>
-            <span>2025</span>
-          </div>
-          <h5 class="mt-2 font-medium text-white">SAM 2 Installation & Overview</h5>
-          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Windows setup, CUDA/PyTorch match, checkpoints, Segment-Geospatial workflow — with images.</p>
+  <div class="grid md:grid-cols-3 gap-6">
+    <!-- Card 1: SAM2 -->
+    <a
+      href="https://himal.blog"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative rounded-xl overflow-hidden border border-slate-800"
+    >
+      <img src="assets/sam2_cover.png" alt="SAM2" class="w-full h-56 object-cover" />
+      <div
+        class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full
+               bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4"
+      >
+        <div class="flex items-center gap-2 text-xs text-white/90">
+          <span class="px-2 py-0.5 rounded bg-pink-600">Computer Vision</span>
+          <span>2025</span>
         </div>
-      </button>
+        <h5 class="mt-2 font-medium text-white">SAM 2 Installation &amp; Overview</h5>
+        <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">
+          Windows setup, CUDA/PyTorch match, checkpoints, Segment-Geospatial workflow — with images.
+        </p>
+      </div>
+    </a>
 
-      <!-- Card 2: Tools -->
-      <button data-open="modal-tools" class="group relative rounded-xl overflow-hidden border border-slate-800">
-        <img src="assets/tools.jpg" alt="Tools" class="w-full h-56 object-cover"/>
-        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
-          <div class="flex items-center gap-2 text-xs text-white/90">
-            <span class="px-2 py-0.5 rounded bg-emerald-600">Dev Notes</span>
-            <span>2025</span>
-          </div>
-          <h5 class="mt-2 font-medium text-white">Top Tools I Use (and why)</h5>
-          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Opinionated picks for GIS + CS work with paste-ready snippets.</p>
+    <!-- Card 2: Tools -->
+    <a
+      href="https://himal.blog"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative rounded-xl overflow-hidden border border-slate-800"
+    >
+      <img src="assets/tools.jpg" alt="Tools" class="w-full h-56 object-cover" />
+      <div
+        class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full
+               bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4"
+      >
+        <div class="flex items-center gap-2 text-xs text-white/90">
+          <span class="px-2 py-0.5 rounded bg-emerald-600">Dev Notes</span>
+          <span>2025</span>
         </div>
-      </button>
+        <h5 class="mt-2 font-medium text-white">Top Tools I Use (and why)</h5>
+        <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">
+          Opinionated picks for GIS + CS work with paste-ready snippets.
+        </p>
+      </div>
+    </a>
 
-      <!-- Card 3: Placeholder for next post -->
-      <a href="#contact" class="group relative rounded-xl overflow-hidden border border-slate-800">
-        <img src="assets/soon.jpg" alt="Blog" class="w-full h-56 object-cover"/>
-        <div class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4">
-          <div class="flex items-center gap-2 text-xs text-white/90">
-            <span class="px-2 py-0.5 rounded bg-sky-600">Update</span>
-            <span>Soon</span>
-          </div>
-          <h5 class="mt-2 font-medium text-white">New research note incoming</h5>
-          <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">Have a topic in mind? Hit me up.</p>
+    <!-- Card 3: Placeholder for next post -->
+    <a
+      href="https://himal.blog"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative rounded-xl overflow-hidden border border-slate-800"
+    >
+      <img src="assets/soon.jpg" alt="Blog" class="w-full h-56 object-cover" />
+      <div
+        class="absolute inset-x-0 bottom-0 transition-all duration-200 ease-in h-24 group-hover:h-full
+               bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent p-4"
+      >
+        <div class="flex items-center gap-2 text-xs text-white/90">
+          <span class="px-2 py-0.5 rounded bg-sky-600">Update</span>
+          <span>Soon</span>
         </div>
-      </a>
-    </div>
-  </section>
+        <h5 class="mt-2 font-medium text-white">New research note incoming</h5>
+        <p class="mt-1 text-slate-300 text-sm hidden group-hover:block">
+          Have a topic in mind? Hit me up.
+        </p>
+      </div>
+    </a>
+  </div>
+</section>
+
 
   <footer class="border-t border-slate-800/80 py-8">
     <div class="max-w-6xl mx-auto px-5 text-sm text-slate-400 flex items-center justify-between">
@@ -918,180 +954,6 @@
     </div>
   </div>
 </div>
-
-
-  <!-- Blog Modal: Tools (updated with your full content) -->
-  <div id="modal-tools" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
-    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-semibold">Top Tools I Use (and Why)</h3>
-        <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
-      </div>
-
-      <p class="mt-3 text-slate-300">
-        When you build across AI, GIS, and full-stack apps, your toolkit becomes your map. Mine has evolved from late-night debugging in PyTorch to mapping tree crowns in ArcGIS and wiring sensors on a Raspberry Pi.
-        These are the tools I reach for when I want to ship fast, keep it clean, and still understand the system under the hood.
-      </p>
-
-      <h4 class="mt-6 font-medium text-slate-100">🌍 ArcGIS Pro / QGIS — Where the Map Begins</h4>
-      <p class="mt-2 text-slate-300">
-        Whether it’s zoning layers for municipalities or remote-sensed imagery, ArcGIS Pro and QGIS are the backbone of my spatial workflow.<br/>
-        <span class="text-slate-200">ArcGIS Pro</span> gives me enterprise-grade precision for cartography, geoprocessing, and topology validation.<br/>
-        <span class="text-slate-200">QGIS</span>, being open source, is perfect for rapid experiments and automations.
-      </p>
-      <p class="mt-2 text-slate-300"><span class="font-medium">Pro tip:</span> Export vector data as GeoPackage (<code class="bg-slate-800 px-1 rounded">.gpkg</code>) — portable, single-file, and readable across both ecosystems.</p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># quick layer export example (QGIS)
-Processing &gt; Toolbox &gt; Vector general &gt; Package layers</code></pre>
-
-      <h4 class="mt-6 font-medium text-slate-100">⚙️ PyTorch + CUDA — Powering GeoAI</h4>
-      <p class="mt-2 text-slate-300">
-        Most of my research pipelines depend on PyTorch accelerated by CUDA for model inference. Before running large jobs, I always verify the CUDA ↔ build matrix to avoid runtime nightmares.
-      </p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># sanity check
-python -m torch.utils.collect_env</code></pre>
-      <p class="mt-2 text-slate-300">
-        This stack powers my integration of Meta’s Segment Anything 2 (SAM2) model — a transformer-based segmentation engine that detects everything from canopy outlines to man-made structures.
-      </p>
-
-      <h4 class="mt-6 font-medium text-slate-100">🗺️ Segment-Geospatial — From Pixels to Polygons</h4>
-      <p class="mt-2 text-slate-300">
-        Segment-Geospatial bridges AI and GIS. It converts SAM masks directly into vector shapefiles, ready for analysis or web visualization.
-      </p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>from segment_geospatial import segment_image
-segment_image("naip_tile.tif", output="mask_vector.shp")</code></pre>
-      <p class="mt-2 text-slate-300">
-        This single function replaces hours of manual digitization, especially when mapping tree crowns from NAIP imagery or CHM rasters.
-      </p>
-
-      <h4 class="mt-6 font-medium text-slate-100">⚛️ React + Vite + Tailwind — Fast Front-Ends</h4>
-      <p class="mt-2 text-slate-300">
-        When I switch from GIS to product prototypes, I rely on this trio:<br/>
-        • React for modular UI logic<br/>
-        • Vite for lightning-fast builds<br/>
-        • Tailwind for clean, responsive design without CSS bloat
-      </p>
-      <p class="mt-2 text-slate-300">They let me go from concept → polished app in one stack. For example, my RunSafe app used this setup to render dynamic route safety scores in real time.</p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>npm create vite@latest appname -- --template react
-cd appname
-npm install
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p</code></pre>
-
-      <h4 class="mt-6 font-medium text-slate-100">🧩 Node / Express — Backends Without the Drama</h4>
-      <p class="mt-2 text-slate-300">I keep my APIs minimal: a few endpoints, one purpose. Node.js + Express handle it gracefully.</p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>app.get("/api/routes", (req, res) =&gt; res.json(routes));</code></pre>
-      <p class="mt-2 text-slate-300">No over-engineering — just reliable JSON backends that talk to the front end instantly.</p>
-
-      <h4 class="mt-6 font-medium text-slate-100">🗃️ MongoDB Atlas — Databases at Hackathon Speed</h4>
-      <p class="mt-2 text-slate-300">
-        When you need a backend in minutes, MongoDB Atlas is unbeatable. Cloud-native, free tier, no deployment hassle.
-        I used it in Kozi.REST to store real-time sensor logs and user summaries, syncing instantly with the dashboard.
-      </p>
-
-      <h4 class="mt-6 font-medium text-slate-100">🔧 Raspberry Pi — When Software Meets Air</h4>
-      <p class="mt-2 text-slate-300">
-        My go-to lab bench for ideas that need sensors. Whether it’s I²C readings from CCS811 or motion data from an MPU6050, the Pi runs simple Python scripts that validate hardware before scaling to production IoT.
-      </p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>import smbus2, time
-bus = smbus2.SMBus(1)</code></pre>
-      <p class="mt-2 text-slate-300">That’s how Kozi.REST came to life — a small sleep-tracking device that talked to an AI backend.</p>
-
-      <h4 class="mt-6 font-medium text-slate-100">🧾 References</h4>
-      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
-        <li>Meta AI (2024). Segment Anything Model 2 (SAM2).</li>
-        <li>Esri (2023). ArcGIS Pro Documentation.</li>
-        <li>PyTorch (2024). Getting Started with CUDA.</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Blog Modal: SAM2 (converted from your Windows setup PDF; no external PDF embed) -->
-  <div id="modal-sam2" class="modal fixed inset-0 z-[61] hidden p-4 overflow-y-auto">
-    <div class="max-w-3xl mx-auto mt-16 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-semibold">SAM 2 Installation &amp; Overview — Windows Setup + Geospatial Integration</h3>
-        <button data-close class="px-3 py-1.5 rounded border border-slate-700">Close</button>
-      </div>
-
-      <p class="mt-3 text-slate-300">
-        Getting Meta’s Segment Anything Model 2.1 (SAM 2.1) running on Windows comes down to a clean Python env, the right PyTorch ⇄ CUDA combo, and the model checkpoints. Here’s the streamlined path I use on Windows.
-      </p>
-
-      <h4 class="mt-5 font-medium text-slate-100">1) Environment &amp; PyTorch (CUDA)</h4>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># create &amp; activate (venv example; conda works too)
-python -m venv .venv
-.\.venv\Scripts\activate
-
-# install PyTorch matching your CUDA (example: CUDA 12.4)
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
-
-# core deps
-pip install opencv-python matplotlib notebook rasterio shapely</code></pre>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># verify CUDA availability &amp; versions
-python -c "import torch; print(torch.cuda.is_available(), torch.version.cuda)"</code></pre>
-
-      <h4 class="mt-5 font-medium text-slate-100">2) Clone &amp; Install SAM2</h4>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>git clone https://github.com/facebookresearch/segment-anything-2.git
-cd segment-anything-2
-pip install -e .</code></pre>
-      <p class="mt-2 text-slate-300">
-        If the repo ships a <code>download_ckpts.sh</code> script, run it under Git Bash/WSL or download checkpoints manually from the model card and place them in a known folder (e.g., <code>./checkpoints/</code>).
-      </p>
-
-      <h4 class="mt-5 font-medium text-slate-100">3) Quick GPU Smoke Test</h4>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>import torch, cv2
-from segment_anything_2 import build_sam2
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model = build_sam2(checkpoint="checkpoints/sam2_hiera_b+.pt").to(device)
-
-img = cv2.imread("your_image.jpg")[:,:,::-1]  # BGR→RGB
-# minimal point prompt example (x=100,y=150)
-point = [[100,150]]; label = [1]
-mask = model.segment(img, point_coords=point, point_labels=label)
-print("Mask shape:", mask.shape)</code></pre>
-
-      <h4 class="mt-5 font-medium text-slate-100">4) Troubleshooting Notes</h4>
-      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
-        <li>Match PyTorch wheel to your installed CUDA (and VS 2022 C++ build tools for any native extensions).</li>
-        <li>If <code>pip install -e .[demo]</code> is flaky on Windows, install listed demo deps individually (OpenCV, Matplotlib, Jupyter).</li>
-        <li>If CUDA isn’t detected, verify your PATHs and <code>torch.cuda.is_available()</code>.</li>
-      </ul>
-
-      <h4 class="mt-6 font-medium text-slate-100">How SAM 2.1 Works (Quick Tour)</h4>
-      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-2">
-        <li><span class="text-slate-200">Image Encoder (Hiera ViT)</span>: streams frames/images into multiscale embeddings.</li>
-        <li><span class="text-slate-200">Prompt Encoder</span>: points/boxes (sparse) and masks (dense) guide what to segment.</li>
-        <li><span class="text-slate-200">Memory Bank + Attention</span>: for videos, past-frame features guide current masks.</li>
-        <li><span class="text-slate-200">Mask Decoder</span>: transformer head outputs masks (and “object absent” when needed).</li>
-        <li><span class="text-slate-200">Memory Encoder</span>: writes current-frame results back to memory for future frames.</li>
-      </ul>
-
-      <h4 class="mt-6 font-medium text-slate-100">5) Geospatial: Segment-Geospatial (SAM on GeoTIFF)</h4>
-      <p class="mt-2 text-slate-300">
-        Use <code>segment-geospatial</code> to run SAM/SAM2 on NAIP/CHM or other GeoTIFFs and export vectors for GIS.
-      </p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code>pip install segment-geospatial</code></pre>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># Automatic mask generation (whole image)
-from samgeo import SamGeo2
-sam = SamGeo2(automatic=True, model_id="sam2-hiera-large")
-sam.generate(image="sample_naip.tif", output="output_mask.tif")</code></pre>
-      <p class="mt-2 text-slate-300">
-        Large scenes can yield hundreds of segments. If you hit uint8 save errors (IDs &gt; 255), write as uint16 GeoTIFF or vectorize directly.
-      </p>
-      <pre class="mt-2 rounded-lg bg-slate-950 border border-slate-800 p-4 overflow-auto text-xs"><code># Prompted prediction (click-like point)
-sam = SamGeo2(automatic=False, model_id="sam2-hiera-large")
-sam.set_image("sample_naip.tif")
-mask = sam.predict(point_coords=[(x, y)], point_labels=[1])</code></pre>
-
-      <h4 class="mt-6 font-medium text-slate-100">Next Steps</h4>
-      <ul class="mt-2 list-disc pl-5 text-slate-300 space-y-1">
-        <li>Vectorize masks to GeoJSON/Shapefile and dissolve/clean small fragments.</li>
-        <li>Try HQ-SAM or domain-tuned variants for sharper edges.</li>
-        <li>Batch tiles + optional text prompts (e.g., “building”) for class-specific extractions.</li>
-      </ul>
-    </div>
-  </div>
 
 
   <!-- Project Modal: Kozi -->
