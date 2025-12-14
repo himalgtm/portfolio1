@@ -4,7 +4,6 @@
 Personal site of **Himal Gautam**
 
 🌐 Live: https://himal.sh
-📦 Repo: https://github.com/himalgtm/portfolio1
 
 ---
 
