@@ -1,9 +1,9 @@
 # portfolio
-# himal.app
+# himal.sh
 
 Personal site of **Himal Gautam**
 
-🌐 Live: https://himal.app  
+🌐 Live: https://himal.sh
 📦 Repo: https://github.com/himalgtm/portfolio1
 
 ---
@@ -29,14 +29,3 @@ No framework circus. Just HTML, utility-style CSS classes, and a bit of JavaScri
 
 That’s it.
 
----
-
-## Run it locally
-
-```bash
-git clone https://github.com/himalgtm/portfolio1.git
-cd portfolio1
-# option 1: just open index.html in a browser
-# option 2: tiny local server
-python -m http.server 8000
-# then go to http://localhost:8000
