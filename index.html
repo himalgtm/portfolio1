@@ -459,27 +459,78 @@
   </header>
 
   <!-- HERO -->
-  <section id="top" class="relative">
-    <div class="max-w-6xl mx-auto px-5 pt-16 pb-10">
-      <div class="grid md:grid-cols-12 gap-8 items-center">
-        <div class="md:col-span-11">
-          <h1 class="text-7xl md:text-8xl font-semibold leading-tight">Hey, I’m <span class="text-brand">Himal Gautam.</span></h1>
-          <p class="mt-6 text-lg text-slate-300 max-w-3xl">
-            CS + GIS @ UNT. I build geospatial AI pipelines, full-stack apps, and hardware-backed prototypes. Open to research collaborations, internships, and GeoAI projects.
-          </p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <a href="https://himal.blog" class="btn px-4 py-2 rounded-lg bg-brand text-slate-900 font-medium hover:bg-brand/dark shadow-glow">Blogs</a>
-            <a href="#projects" class="btn px-4 py-2 rounded-lg border border-slate-700">Projects</a>
-            <a href="mailto:himalgautam@my.unt.edu" class="btn px-4 py-2 rounded-lg border border-slate-700">Email</a>
-            <a href="assets/himal_s_resume.pdf" download class="btn px-3 py-2 rounded-lg border border-slate-700 hover:bg-slate-900/60">Download Résumé</a>
+<section id="top" class="relative mt-[2in]">
+  <div class="max-w-6xl mx-auto px-5 pt-4 pb-16">
+    <div class="grid md:grid-cols-12 gap-10 items-center">
+
+      <!-- Left: text -->
+      <div class="md:col-span-7">
+        <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight tracking-tight">
+          <span class="block">Hey, I’m</span>
+          <span class="block bg-gradient-to-r from-emerald-300 to-cyan-300 bg-clip-text text-transparent">Himal Gautam</span>
+        </h1>
+
+        <p class="mt-5 text-lg text-slate-300 max-w-3xl">
+          Welcome to my corner on the internet.
+        </p>
+
+        <div class="mt-6 flex flex-wrap gap-3 items-center">
+          <a href="https://himal.blog"
+             class="px-4 py-2 rounded-lg bg-brand text-slate-900 font-medium hover:bg-emerald-400/90 shadow-lg shadow-emerald-500/30">
+            Blogs
+          </a>
+          <a href="#projects"
+             class="px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-900/60 transition">
+            Projects
+          </a>
+          <a href="mailto:himalgautam@my.unt.edu"
+             class="px-4 py-2 rounded-lg border border-slate-700 hover:bg-slate-900/60 transition">
+            Email
+          </a>
+          <a href="assets/himal_s_resume.pdf" download
+             class="px-3 py-2 rounded-lg border border-slate-700 hover:bg-slate-900/60 transition">
+            Download Résumé
+          </a>
+        </div>
+
+        <div class="mt-4 text-sm text-slate-400">
+          <span class="inline-flex items-center gap-1 text-base">
+            <span aria-hidden="true">📍</span>
+            <span>Denton, TX</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Right: portrait + dots -->
+      <div class="md:col-span-5 flex justify-center md:justify-end">
+        <div class="relative">
+          <!-- main portrait circle -->
+          <div
+            class="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full overflow-hidden
+                   ring-4 ring-brand/70 shadow-2xl shadow-emerald-500/30 bg-slate-900">
+            <img
+              src="assets/himal-portrait.jpg"
+              alt="Himal Gautam"
+              class="w-full h-full object-cover" />
           </div>
-          <div class="mt-6 text-sm text-slate-400 space-x-1">
-            <span>Denton, TX</span> · <span>(862) 428-4433</span>
-          </div>
+
+          <!-- top-right dot -->
+          <span class="absolute -top-3 -right-3 w-6 h-6">
+            <span class="absolute inset-0 rounded-full bg-emerald-400/80"></span>
+            <span class="absolute inset-0 rounded-full bg-emerald-400/60 animate-ping"></span>
+          </span>
+
+          <!-- bottom-left dot -->
+          <span class="absolute bottom-0 -left-4 w-4 h-4">
+            <span class="absolute inset-0 rounded-full bg-cyan-400/80"></span>
+            <span class="absolute inset-0 rounded-full bg-cyan-400/60 animate-ping"></span>
+          </span>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
 
 
 <section id="about" class="max-w-6xl mx-auto px-5 py-10">
@@ -488,11 +539,11 @@
     <!-- Education -->
     <div class="fx-card card-clear fx-tilt p-5">
       <div class="fx-tilt-inner">
-        <h2 class="text-2xl mb-3 fx-heading font-bold">Education</h2>
+        <h2 class="text-2xl mb-5 fx-heading font-bold">Education</h2>
 
-        <div class="space-y-6">
+        <div class="space-y-7">
           <!-- UNT -->
-          <div class="flex items-start gap-4">
+          <div class="flex items-start gap-5">
             <div class="shrink-0 grid place-items-center w-14 h-14 rounded-full bg-white ring-1 ring-slate-300 shadow-inner">
               <img src="assets/unt_logo.png" alt="UNT" class="max-w-[70%] object-contain">
             </div>
@@ -504,7 +555,7 @@
               </div>
               <div class="text-sm mt-1 fx-copy">GPA: 3.89 · Dean’s List</div>
               <div class="text-sm mt-1 fx-copy">
-                Coursework: Data Structures I, Operating Systems, LiDAR in GIS, DBMS, Full-stack Dev, Prob &amp; Stats
+                Coursework: Data Structures & Algorithms, Operating Systems, LiDAR use in GIS, DBMS, Full-stack Web Development, Probability &amp; Statistics.
               </div>
             </div>
           </div>
@@ -518,7 +569,7 @@
               <div class="font-medium fx-copy">Caldwell University - Caldwell, NJ</div>
               <div class="text-sm fx-copy">
                 B.S. Computer Science
-                <span class="text-slate-400">(Jan 2024 – May 2025; transferred)</span>
+                <span class="text-slate-400">(Jan 2024 - May 2025; transferred)</span>
               </div>
             </div>
           </div>
@@ -528,24 +579,40 @@
     
     <!-- ABOUT (trigger) -->
 
-    <div id="about-card" class="fx-card card-clear fx-tilt p-8 cursor-pointer" aria-controls="about-modal" aria-expanded="false">
-      <div class="fx-tilt-inner space-y-4">
-      <h2 class="text-2xl mb-2 fx-heading"><strong>A little about myself...</strong></h2>
-        <p>
-          I am a computer science and map enthusiast, and a full-time believer that curiosity can build bridges between code and the real world. I spend most days debugging, mapping, or trying to make satellites and algorithms understand the planet a little better.
-        </p>
-        <blockquote class="pull-quote mt-2">
-          I care a lot about questions: why things work, who they serve, and what they leave out. The more I learn, the more that line feels true:<em>“The more I know, the less I understand.”</em>
-        </blockquote>
-        <p>
-          When I’m not buried in a terminal, I’m usually getting lost in
-          <a href="https://boxd.it/6TMW3" target="_blank" rel="noreferrer" class="underline text-emerald-300 hover:text-emerald-200">films</a>
-          and
-          <a href="https://open.spotify.com/user/31h3wiyxxhnc33jscn7a6chjkfoe?si=ab32a059bd614756" target="_blank" rel="noreferrer" class="underline text-sky-400 hover:text-sky-300">music</a>.
-        </p>
-        <div class="mt-4 inline-flex items-center gap-2 text-sky-300/90 text-sm">
-          <svg width="16" height="16" viewBox="0 0 24 24" class="inline"><path fill="currentColor" d="M12 2L3 7v6c0 5 3.8 9.7 9 10c5.2-.3 9-5 9-10V7l-9-5Z"/></svg>
-          <span>A little more about me... </span>
+    <div
+      id="about-card"
+      class="fx-card card-clear fx-tilt p-5 cursor-pointer"
+      role="button"
+      tabindex="0"
+      aria-controls="about-modal"
+      aria-expanded="false"
+      onclick="this.setAttribute('aria-expanded','true')"
+      onkeydown="if(event.key==='Enter' || event.key===' ') { this.click(); }"
+      aria-label="Open about panel"
+    >
+      <div class="fx-tilt-inner flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <h2 class="text-2xl mb-2 fx-heading"><strong>A little about myself...</strong></h2>
+          <p class="mt-3 leading-relaxed">
+            I am a computer science and map enthusiast, and a full-time believer that curiosity can build bridges between code and the real world. I build geospatial AI pipelines, full-stack apps, and hardware-backed prototypes.
+          </p>
+          <blockquote class="pull-quote mt-3">
+            I’m driven mostly by curiosity. I like asking why things work the way they do, who they’re really helping, and what might be missing. As the saying goes: <em>“The more I learn, the less I realize I know.”</em>
+          </blockquote>
+          <p class="mt-3 leading-relaxed">
+            I am also very passionate about
+            <a href="https://boxd.it/6TMW3" target="_blank" rel="noreferrer" class="underline text-emerald-300 hover:text-emerald-200">films</a>
+            and
+            <a href="https://open.spotify.com/user/31h3wiyxxhnc33jscn7a6chjkfoe?si=ab32a059bd614756" target="_blank" rel="noreferrer" class="underline text-sky-400 hover:text-sky-300">music</a>.
+          </p>
+        </div>
+
+        <!-- Click / tap affordance (icon + label) -->
+        <div class="flex flex-col items-center justify-center shrink-0 ml-4">
+          <svg class="w-6 h-6 text-sky-300" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          
         </div>
       </div>
     </div>
