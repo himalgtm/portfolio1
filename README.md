@@ -1,4 +1,4 @@
-# portfolio
+# PORTFOLIO
 # himal.sh
 
 Personal site of **Himal Gautam**
